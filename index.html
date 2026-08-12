@@ -1,0 +1,1684 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Production Engineering Learning Map</title>
+<style>
+  :root{
+    --ink:#1e293b; --ink-light:#475569; --ink-faint:#64748b;
+    --canvas:#f4f6f9; --card-bg:#ffffff; --line:#e2e8f0;
+
+    --test:#1d4ed8;      --test-bg:#eff6ff;      --test-border:#bfdbfe;   --test-soft:#dbeafe;
+    --container:#0e7490; --container-bg:#ecfeff; --container-border:#a5f3fc; --container-soft:#cffafe;
+    --cicd:#6d28d9;      --cicd-bg:#f5f3ff;      --cicd-border:#ddd6fe;  --cicd-soft:#ede9fe;
+    --monitor:#c2410c;   --monitor-bg:#fff7ed;   --monitor-border:#fed7aa; --monitor-soft:#ffedd5;
+    --network:#15803d;   --network-bg:#f0fdf4;   --network-border:#bbf7d0; --network-soft:#dcfce7;
+    --gold:#b45309;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:var(--canvas); color:var(--ink); line-height:1.35;
+  }
+  .page{max-width:1760px;margin:0 auto;padding:22px 28px 40px;}
+
+  /* ---------- header ---------- */
+  header.hero{
+    background:linear-gradient(120deg,#0f172a,#1e293b 55%,#0f172a);
+    border-radius:16px; padding:26px 34px; color:#fff; text-align:center;
+    box-shadow:0 8px 24px rgba(15,23,42,.18);
+  }
+  header.hero h1{margin:0 0 6px; font-size:32px; letter-spacing:.3px;}
+  header.hero p{margin:0; font-size:14.5px; color:#cbd5e1; max-width:900px; margin:0 auto;}
+
+  /* ---------- legend ---------- */
+  .legend-bar{
+    margin-top:16px; background:var(--card-bg); border:1px solid var(--line); border-radius:12px;
+    padding:12px 18px; display:flex; flex-wrap:wrap; align-items:center; gap:14px 22px; font-size:12.5px;
+  }
+  .legend-title{font-weight:700; color:var(--ink); font-size:12.5px; text-transform:uppercase; letter-spacing:.06em;}
+  .legend-chip{display:inline-flex; align-items:center; gap:6px; font-weight:600; color:var(--ink);}
+  .legend-swatch{width:13px;height:13px;border-radius:4px;display:inline-block;}
+  .sw-test{background:var(--test);} .sw-container{background:var(--container);} .sw-cicd{background:var(--cicd);}
+  .sw-monitor{background:var(--monitor);} .sw-network{background:var(--network);}
+  .legend-sep{width:1px;height:18px;background:var(--line);}
+  .legend-note{color:var(--ink-light);}
+  .legend-note b{color:var(--ink);}
+  .icon-key{display:flex;gap:14px;flex-wrap:wrap;align-items:center;}
+  .icon-key span{display:inline-flex;align-items:center;gap:5px;color:var(--ink-light);}
+  .icon-key svg{width:15px;height:15px;color:var(--ink-faint);}
+
+  /* ---------- section shells ---------- */
+  section.panel{
+    margin-top:22px; background:var(--card-bg); border:1px solid var(--line); border-radius:16px;
+    padding:20px 26px 24px; box-shadow:0 2px 10px rgba(15,23,42,.04);
+  }
+  section.panel > h2{
+    margin:0 0 4px; font-size:19px; color:var(--ink); display:flex; align-items:center; gap:8px;
+  }
+  .panel-desc{margin:0 0 14px; font-size:12.5px; color:var(--ink-light);}
+  .tag{font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; background:var(--ink); color:#fff; padding:2px 8px; border-radius:20px;}
+
+  /* ---------- lifecycle ---------- */
+  .lifecycle-wrap{width:100%; overflow-x:auto;}
+  .lifecycle-wrap svg{width:100%; min-width:980px; height:auto; display:block;}
+  .env-legend{display:flex; gap:18px; margin-top:10px; flex-wrap:wrap; font-size:11.5px; color:var(--ink-light);}
+  .env-legend span{display:inline-flex; align-items:center; gap:6px;}
+  .env-dot{width:11px;height:11px;border-radius:3px;display:inline-block;}
+
+  /* ---------- flow strips (used inside topic cards) ---------- */
+  .flow-strip{display:flex; flex-wrap:wrap; align-items:center; gap:5px; margin:10px 0 4px;}
+  .flow-step{
+    background:#fff; border:1.4px solid currentColor; border-radius:8px; padding:5px 9px;
+    font-size:11.3px; font-weight:600; white-space:nowrap; position:relative;
+  }
+  .flow-step small{display:block; font-weight:400; font-size:9.6px; opacity:.85; white-space:normal; max-width:120px;}
+  .flow-arrow{font-weight:700; opacity:.55; font-size:13px;}
+  .env-flag{position:absolute; top:-9px; right:-4px; font-size:8px; font-weight:800; letter-spacing:.04em; padding:1px 4px; border-radius:6px; color:#fff;}
+
+  /* ---------- topics grid ---------- */
+  .topics-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(400px,1fr)); gap:20px; margin-top:22px;}
+  article.card{border-radius:16px; overflow:hidden; border:1px solid var(--line); background:#fff; box-shadow:0 2px 10px rgba(15,23,42,.05); display:flex; flex-direction:column;}
+  .card-head{padding:14px 18px; color:#fff; display:flex; align-items:center; gap:10px;}
+  .card-head svg{width:22px;height:22px; flex:none;}
+  .card-head h3{margin:0; font-size:16.5px;}
+  .card-head .purpose{margin:2px 0 0; font-size:11.5px; font-weight:500; opacity:.95;}
+  .card-body{padding:16px 18px 20px; font-size:12.3px; color:var(--ink);}
+  .card.test .card-head{background:var(--test);}
+  .card.container .card-head{background:var(--container);}
+  .card.cicd .card-head{background:var(--cicd);}
+  .card.monitor .card-head{background:var(--monitor);}
+  .card.network .card-head{background:var(--network);}
+
+  .card.test .flow-step, .card.test .flow-arrow{color:var(--test);}
+  .card.container .flow-step, .card.container .flow-arrow{color:var(--container);}
+  .card.cicd .flow-step, .card.cicd .flow-arrow{color:var(--cicd);}
+  .card.monitor .flow-step, .card.monitor .flow-arrow{color:var(--monitor);}
+  .card.network .flow-step, .card.network .flow-arrow{color:var(--network);}
+
+  h4.sub{margin:16px 0 6px; font-size:12px; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-faint); font-weight:700;}
+  h4.sub:first-child{margin-top:2px;}
+
+  .chip-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:7px;}
+  .chip{border-radius:9px; padding:7px 9px; font-size:11.2px;}
+  .card.test .chip{background:var(--test-bg); border:1px solid var(--test-border);}
+  .card.container .chip{background:var(--container-bg); border:1px solid var(--container-border);}
+  .card.cicd .chip{background:var(--cicd-bg); border:1px solid var(--cicd-border);}
+  .card.monitor .chip{background:var(--monitor-bg); border:1px solid var(--monitor-border);}
+  .card.network .chip{background:var(--network-bg); border:1px solid var(--network-border);}
+  .chip b{display:block; font-size:11.6px; margin-bottom:1px;}
+  .chip span{color:var(--ink-light); font-size:10.6px;}
+
+  .mini-flow{display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin:8px 0;}
+  .mini-box{border-radius:9px; padding:9px 12px; font-size:11.5px; font-weight:700; text-align:center; min-width:110px;}
+  .card.container .mini-box{background:var(--container-soft); border:1.5px solid var(--container);}
+  .mini-arrow{font-size:16px; font-weight:800; opacity:.6;}
+
+  .k8s-row{display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-top:6px;}
+  .k8s-box{border:1.5px dashed var(--container); border-radius:10px; padding:8px 10px; font-size:11px;}
+  .k8s-box b{display:block; font-size:11.5px;}
+  .k8s-box span{color:var(--ink-light); font-size:10.2px;}
+
+  .pillars-row{display:flex; gap:8px; margin:8px 0 4px; flex-wrap:wrap;}
+  .pillar{flex:1; min-width:130px; background:var(--monitor-soft); border:1.5px solid var(--monitor); border-radius:10px; padding:9px 10px;}
+  .pillar b{display:block; font-size:12px;} .pillar span{font-size:10.4px; color:var(--ink-light);}
+
+  .golden{display:flex; gap:7px; flex-wrap:wrap; margin:8px 0;}
+  .golden div{background:var(--monitor); color:#fff; font-size:11px; font-weight:700; padding:6px 10px; border-radius:20px;}
+
+  .strategy-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:7px; margin-top:6px;}
+
+  .cicd-types{display:flex; gap:8px; flex-wrap:wrap; margin:8px 0;}
+  .cicd-type{flex:1; min-width:150px; border-radius:10px; padding:9px 10px; border:1.5px solid var(--cicd); background:var(--cicd-soft);}
+  .cicd-type b{display:block; font-size:11.6px;} .cicd-type span{font-size:10.2px; color:var(--ink-light);}
+
+  .toolbox{display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:6px; margin-top:6px;}
+  .tool{background:#0f172a; color:#e2e8f0; border-radius:8px; padding:7px 9px; font-size:11px;}
+  .tool code{color:#7dd3fc; font-weight:700; font-size:11.5px;}
+  .tool span{display:block; color:#94a3b8; font-size:10.2px; margin-top:1px;}
+
+  /* ---------- cross connections ---------- */
+  .connections-wrap{display:grid; grid-template-columns:340px 1fr; gap:24px; align-items:center;}
+  .connections-wrap svg{width:100%; height:auto;}
+  .connection-list{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:7px;}
+  .connection-list li{display:flex; align-items:center; gap:9px; font-size:12px; background:#f8fafc; border:1px solid var(--line); border-radius:9px; padding:7px 10px;}
+  .dotgrp{display:flex; gap:3px; flex:none;}
+  .dot{width:10px;height:10px;border-radius:50%;}
+  .arrow-sm{color:var(--ink-faint); font-weight:800;}
+
+  @media (max-width:900px){ .connections-wrap{grid-template-columns:1fr;} }
+
+  /* ---------- takeaway ---------- */
+  .takeaway{
+    margin-top:22px; border-radius:16px; padding:26px 34px; text-align:center;
+    background:linear-gradient(120deg,#0f172a,#1e293b); color:#fff;
+  }
+  .takeaway h2{margin:0 0 8px; font-size:14px; text-transform:uppercase; letter-spacing:.08em; color:#93c5fd;}
+  .takeaway p{margin:0; font-size:17px; font-weight:600; max-width:1100px; margin:0 auto; line-height:1.5;}
+
+  footer.note{text-align:center; color:var(--ink-faint); font-size:11px; margin-top:16px;}
+
+  /* ---------- nav ---------- */
+  html{scroll-behavior:smooth;}
+  [id^="sec-"]{scroll-margin-top:76px;}
+  .topnav{position:sticky; top:12px; z-index:60; background:#0f172a; border-radius:12px;
+    padding:9px 14px; margin-top:14px; box-shadow:0 6px 18px rgba(15,23,42,.3);
+    display:flex; align-items:center; gap:3px; flex-wrap:wrap;}
+  .topnav .brand{color:#fff; font-weight:800; font-size:12.5px; margin-right:8px; letter-spacing:.03em; white-space:nowrap;}
+  .nav-link{color:#cbd5e1; text-decoration:none; font-size:12px; font-weight:600; padding:6px 10px;
+    border-radius:7px; border-bottom:2.5px solid transparent; transition:background .15s,color .15s;}
+  .nav-link:hover{background:rgba(255,255,255,.09); color:#fff;}
+  .nav-link.active{color:#fff; background:rgba(255,255,255,.14);}
+  .nav-link.nav-testing.active{border-bottom-color:var(--test);}
+  .nav-link.nav-containers.active{border-bottom-color:var(--container);}
+  .nav-link.nav-cicd.active{border-bottom-color:var(--cicd);}
+  .nav-link.nav-monitoring.active{border-bottom-color:var(--monitor);}
+  .nav-link.nav-networking.active{border-bottom-color:var(--network);}
+  .nav-link.nav-lifecycle.active, .nav-link.nav-connections.active, .nav-link.nav-oncall.active, .nav-link.nav-takeaway.active{border-bottom-color:#93c5fd;}
+
+  /* ---------- incident simulator ---------- */
+  .flow-step.is-broken{background:#fee2e2 !important; border-color:#dc2626 !important; color:#7f1d1d !important; position:relative;}
+  .flow-step.is-broken::after{content:"\2715"; position:absolute; top:-9px; left:-9px; background:#dc2626; color:#fff;
+    width:16px; height:16px; border-radius:50%; font-size:10px; display:flex; align-items:center; justify-content:center; font-weight:800;}
+  .flow-step.is-warn{background:#ffedd5 !important; border-color:#ea580c !important; color:#7c2d12 !important; position:relative;}
+  .flow-step.is-warn::after{content:"!"; position:absolute; top:-9px; left:-9px; background:#ea580c; color:#fff;
+    width:16px; height:16px; border-radius:50%; font-size:10.5px; display:flex; align-items:center; justify-content:center; font-weight:800;}
+  .sim-box{margin-top:16px; border:1.5px solid var(--network-border); background:var(--network-bg); border-radius:12px; padding:14px 16px;}
+  .sim-title{font-size:12.5px; font-weight:800; text-transform:uppercase; letter-spacing:.05em; color:var(--network); margin:0 0 4px;}
+  .sim-intro{margin:0 0 10px; font-size:11.3px; color:var(--ink-light);}
+  .scenario-row{display:flex; gap:6px; flex-wrap:wrap; margin-bottom:10px;}
+  .scenario-btn{background:#fff; border:1.5px solid var(--network); color:var(--network); font-size:11px;
+    font-weight:700; padding:6px 11px; border-radius:20px; cursor:pointer; font-family:inherit;}
+  .scenario-btn:hover{background:var(--network-soft);}
+  .scenario-btn.active{background:var(--network); color:#fff;}
+  .alert-banner{display:none; font-size:11.8px; font-weight:700; padding:8px 12px; border-radius:8px; margin-bottom:10px;}
+  .alert-banner.show{display:block;}
+  .alert-banner.crit{background:#fee2e2; color:#991b1b; border:1px solid #fecaca;}
+  .alert-banner.warn{background:#ffedd5; color:#9a3412; border:1px solid #fed7aa;}
+  .tool-btn-row{display:flex; gap:6px; flex-wrap:wrap; margin-bottom:10px;}
+  .tool-btn{background:#0f172a; color:#7dd3fc; font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+    font-size:11.3px; font-weight:700; padding:6px 11px; border-radius:7px; border:1.5px solid #1e293b; cursor:pointer;}
+  .tool-btn:hover:not(:disabled){background:#1e293b;}
+  .tool-btn:disabled{opacity:.4; cursor:not-allowed;}
+  .tool-btn.key-tool{box-shadow:0 0 0 2px #22c55e; color:#bbf7d0;}
+  .terminal{background:#0b1220; color:#d1fae5; font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+    font-size:11px; border-radius:9px; padding:10px 12px; min-height:56px; max-height:220px; overflow-y:auto;
+    white-space:pre-wrap; line-height:1.55;}
+  .terminal .muted{color:#64748b;}
+  .sim-actions{display:flex; gap:8px; margin-top:10px;}
+  .sim-btn{font-size:11.3px; font-weight:700; padding:7px 13px; border-radius:8px; cursor:pointer; border:none; font-family:inherit;}
+  .sim-btn.reveal{background:var(--network); color:#fff;}
+  .sim-btn.reveal:disabled{opacity:.4; cursor:not-allowed;}
+  .sim-btn.reset{background:#e2e8f0; color:#334155;}
+  .diagnosis-box{display:none; margin-top:10px; background:#fff; border:1.5px solid var(--network); border-radius:10px; padding:10px 12px; font-size:11.6px;}
+  .diagnosis-box.show{display:block;}
+  .diagnosis-box b{color:var(--network);}
+
+  /* ---------- generic reveal chips (click-to-expand) ---------- */
+  .chip, .pillar, .cicd-type{cursor:pointer; position:relative; padding-right:24px; -webkit-tap-highlight-color:transparent;}
+  .chip:focus-visible, .pillar:focus-visible, .cicd-type:focus-visible{outline:2px solid #0f172a; outline-offset:2px;}
+  .chip::after, .pillar::after, .cicd-type::after{content:"\203A"; position:absolute; top:6px; right:8px; font-size:15px; font-weight:800; opacity:.4; transition:transform .2s ease;}
+  .chip.open::after, .pillar.open::after, .cicd-type.open::after{transform:rotate(90deg);}
+  .chip span, .pillar span, .cicd-type span{display:block; max-height:0; opacity:0; overflow:hidden; transition:max-height .28s ease, opacity .2s ease, margin-top .2s ease;}
+  .chip.open span, .pillar.open span, .cicd-type.open span{max-height:130px; opacity:1; margin-top:4px;}
+  .chip span code, .pillar span code{display:inline-block; margin-top:3px; background:#0f172a; color:#7dd3fc; font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:10px; padding:2px 6px; border-radius:5px;}
+  .tap-hint{margin:0 0 8px; font-size:10.6px; color:var(--ink-faint); font-style:italic;}
+
+  /* ---------- testing pyramid interactivity ---------- */
+  .pyr-layer{cursor:pointer; transition:opacity .15s ease;}
+  .pyr-layer:hover{opacity:.85;}
+  .pyr-layer.active{stroke:#facc15 !important; stroke-width:4 !important;}
+  .pyramid-detail{font-size:11.3px; color:var(--ink-light); background:#fff; border:1px solid var(--test-border); border-radius:10px; padding:9px 11px;}
+  .pyramid-detail b{display:block; color:#1e293b; font-size:12px; margin-bottom:3px;}
+  .pyramid-detail p{margin:0;}
+
+  /* ---------- quiz widget ---------- */
+  .quiz-box{border:1.5px solid var(--test); background:var(--test-bg); border-radius:12px; padding:14px 16px; margin-top:16px;}
+  .quiz-title{font-weight:800; font-size:12.5px; text-transform:uppercase; letter-spacing:.05em; color:var(--test); margin:0 0 6px;}
+  .quiz-q{font-size:12.3px; font-weight:600; color:var(--ink); margin:0 0 10px;}
+  .quiz-options{display:flex; gap:6px; flex-wrap:wrap; margin-bottom:8px;}
+  .quiz-opt{background:#fff; border:1.5px solid var(--test); color:var(--test); font-size:11.2px; font-weight:700; padding:6px 11px; border-radius:20px; cursor:pointer; font-family:inherit;}
+  .quiz-opt:hover:not(:disabled){background:var(--test-soft);}
+  .quiz-opt:disabled{cursor:not-allowed;}
+  .quiz-opt.correct{background:#16a34a; border-color:#16a34a; color:#fff;}
+  .quiz-opt.incorrect{background:#dc2626; border-color:#dc2626; color:#fff;}
+  .quiz-feedback{font-size:11.4px; color:var(--ink-light); min-height:32px; margin-bottom:8px;}
+  .quiz-footer{display:flex; align-items:center; justify-content:space-between; font-size:11.4px; font-weight:700; color:var(--ink);}
+  .quiz-footer button{background:var(--test); color:#fff; border:none; padding:7px 13px; border-radius:8px; font-size:11.3px; font-weight:700; cursor:pointer; font-family:inherit;}
+
+  /* ---------- container player ---------- */
+  .player-stage.active{background:#fef9c3 !important; border-color:#ca8a04 !important; color:#78350f !important;}
+  .player-stage.done{background:var(--container-soft) !important; border-color:var(--container) !important;}
+  .player-caption{margin:0; font-size:11.2px; color:var(--ink-light); font-style:italic;}
+
+  /* ---------- cicd pipeline runner ---------- */
+  .cicd-step.running{background:#fef9c3 !important; border-color:#ca8a04 !important; color:#78350f !important;}
+  .cicd-step.passed{background:var(--cicd-soft) !important; border-color:var(--cicd) !important;}
+  .cicd-step.failed{background:#fee2e2 !important; border-color:#dc2626 !important; color:#7f1d1d !important;}
+  .cicd-step.skipped{background:#f1f5f9 !important; border-color:#cbd5e1 !important; color:#94a3b8 !important; opacity:.75;}
+  .cicd-step.ci-focus{box-shadow:0 0 0 2px var(--cicd) inset;}
+  .runner-controls{display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin:10px 0 4px;}
+  .runner-controls select{font-size:11.2px; padding:6px 8px; border-radius:7px; border:1.5px solid var(--cicd); font-family:inherit; color:var(--cicd); background:#fff;}
+  .runner-btn{border:none; color:#fff; font-size:11.3px; font-weight:700; padding:7px 13px; border-radius:8px; cursor:pointer; font-family:inherit;}
+  .runner-btn:disabled{opacity:.5; cursor:not-allowed;}
+  .runner-btn.reset{background:#e2e8f0; color:#334155;}
+
+  /* ---------- shared small sim widgets ---------- */
+  .mini-sim{border-radius:12px; padding:14px 16px; margin-top:16px; border:1.5px solid;}
+  .mini-sim .sim-title{margin:0 0 4px;}
+  .mini-sim .sim-intro{margin:0 0 10px;}
+  .range-row{display:flex; align-items:center; gap:10px; flex-wrap:wrap;}
+  .range-row input[type=range]{accent-color:currentColor; flex:1; min-width:140px;}
+  .stat-row{display:flex; gap:18px; flex-wrap:wrap; margin-top:10px;}
+  .stat-row b{display:block; font-size:19px;}
+  .stat-row div div{font-size:10.4px; color:var(--ink-light);}
+  .cidr-input{font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:12px; padding:6px 9px; border-radius:7px; border:1.5px solid currentColor; width:170px;}
+
+  /* ---------- networking: request journey animation ---------- */
+  .journey-svg{width:100%; max-width:420px; height:auto; display:block; margin:6px auto 4px;}
+  .journey-phase{font-size:10px; font-weight:800; letter-spacing:.05em; text-transform:uppercase; color:#fff; padding:3px 9px; border-radius:20px; display:inline-block;}
+
+  /* ---------- on-call simulator ---------- */
+  .oncall-meta{display:flex; justify-content:space-between; font-size:12px; font-weight:700; color:var(--ink); margin-bottom:6px;}
+  .oncall-timerbar{height:7px; background:#e2e8f0; border-radius:4px; overflow:hidden; margin-bottom:12px;}
+  .oncall-timerfill{height:100%; background:#16a34a; width:100%; transition:width .15s linear, background .3s;}
+  .oncall-timerfill.warn{background:#ca8a04;}
+  .oncall-timerfill.crit{background:#dc2626;}
+  .oncall-actions{display:flex; flex-direction:column; gap:7px; margin:10px 0;}
+  .oncall-action-btn{text-align:left; background:#fff; border:1.5px solid #cbd5e1; border-radius:9px; padding:10px 13px; font-size:12.3px; font-weight:600; cursor:pointer; font-family:inherit; color:var(--ink); transition:background .15s;}
+  .oncall-action-btn:hover:not(:disabled){background:#f8fafc;}
+  .oncall-action-btn:disabled{cursor:not-allowed;}
+  .oncall-action-btn.correct{background:#dcfce7; border-color:#16a34a; color:#14532d;}
+  .oncall-action-btn.incorrect{background:#fee2e2; border-color:#dc2626; color:#7f1d1d;}
+  .oncall-topic-tag{display:inline-block; font-size:9.5px; font-weight:800; letter-spacing:.05em; text-transform:uppercase; padding:3px 8px; border-radius:20px; color:#fff; margin-right:8px;}
+  .oncall-summary-grade{font-size:22px; font-weight:800; margin:2px 0 4px;}
+  .oncall-recap{list-style:none; margin:10px 0 0; padding:0; display:flex; flex-direction:column; gap:5px; font-size:11.4px;}
+  .oncall-recap li{display:flex; gap:8px; align-items:center; background:#f8fafc; border:1px solid var(--line); border-radius:8px; padding:6px 10px;}
+  .oncall-mark{font-weight:800;}
+  .oncall-mark.ok{color:#16a34a;}
+  .oncall-mark.bad{color:#dc2626;}
+</style>
+</head>
+<body>
+
+<!-- reusable icon symbols -->
+<svg width="0" height="0" style="position:absolute">
+<defs>
+<symbol id="i-test" viewBox="0 0 24 24"><path d="M9 2h6M10 2v6.2L4.6 18.5A2 2 0 0 0 6.4 21.5h11.2a2 2 0 0 0 1.8-3L14 8.2V2" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M7.6 15.5h8.8" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></symbol>
+<symbol id="i-container" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="1.2" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M8 7v13M13 7v13M18 7v13M3 12h18" fill="none" stroke="currentColor" stroke-width="1.3"/></symbol>
+<symbol id="i-pipeline" viewBox="0 0 24 24"><path d="M4 13a8 8 0 0 1 14.5-4.6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M18.5 5v4h-4" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M20 11a8 8 0 0 1-14.5 4.6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M5.5 19v-4h4" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-chart" viewBox="0 0 24 24"><path d="M3 21h18" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><rect x="5" y="14" width="3.4" height="6" fill="currentColor"/><rect x="10.3" y="9" width="3.4" height="11" fill="currentColor"/><rect x="15.6" y="4" width="3.4" height="16" fill="currentColor"/></symbol>
+<symbol id="i-alert" viewBox="0 0 24 24"><path d="M6 9a6 6 0 0 1 12 0c0 4.2 1.6 5.6 1.6 5.6H4.4S6 13.2 6 9z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M9.5 17.5a2.5 2.5 0 0 0 5 0" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></symbol>
+<symbol id="i-server" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="6.5" rx="1.1" fill="none" stroke="currentColor" stroke-width="1.6"/><rect x="3" y="13.5" width="18" height="6.5" rx="1.1" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="6.4" cy="7.25" r="0.9" fill="currentColor"/><circle cx="6.4" cy="16.75" r="0.9" fill="currentColor"/></symbol>
+<symbol id="i-database" viewBox="0 0 24 24"><ellipse cx="12" cy="5.5" rx="8" ry="3" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M4 5.5v13c0 1.66 3.58 3 8 3s8-1.34 8-3v-13" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M4 12c0 1.66 3.58 3 8 3s8-1.34 8-3" fill="none" stroke="currentColor" stroke-width="1.6"/></symbol>
+<symbol id="i-network" viewBox="0 0 24 24"><circle cx="5" cy="6" r="2.1" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="19" cy="6" r="2.1" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="12" cy="19" r="2.1" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M6.9 7.1 17.1 7.1M6.2 7.8 11 17.3M17.8 7.8 13 17.3" fill="none" stroke="currentColor" stroke-width="1.4"/></symbol>
+<symbol id="i-code" viewBox="0 0 24 24"><path d="M9 6 3.5 12 9 18M15 6l5.5 6-5.5 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-magnifier" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.2" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M15.2 15.2 21 21" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+</defs>
+</svg>
+
+<div class="page">
+
+  <header class="hero">
+    <h1>Production Engineering Learning Map</h1>
+    <p>How Testing, Containers, CI/CD, Monitoring, and Networking work together to build, ship, and run software reliably in production &mdash; a study guide for SRE / DevOps / infrastructure interview prep.</p>
+  </header>
+
+  <nav class="topnav" aria-label="Section navigation">
+    <span class="brand">JUMP TO</span>
+    <a class="nav-link nav-lifecycle" href="#sec-lifecycle">Lifecycle</a>
+    <a class="nav-link nav-testing" href="#sec-testing">Testing</a>
+    <a class="nav-link nav-containers" href="#sec-containers">Containers</a>
+    <a class="nav-link nav-cicd" href="#sec-cicd">CI/CD</a>
+    <a class="nav-link nav-monitoring" href="#sec-monitoring">Monitoring</a>
+    <a class="nav-link nav-networking" href="#sec-networking">Networking</a>
+    <a class="nav-link nav-connections" href="#sec-connections">Connections</a>
+    <a class="nav-link nav-oncall" href="#sec-oncall">On-Call Sim</a>
+    <a class="nav-link nav-takeaway" href="#sec-takeaway">Takeaway</a>
+  </nav>
+
+  <section class="legend-bar">
+    <span class="legend-title">Legend</span>
+    <span class="legend-chip"><span class="legend-swatch sw-test"></span>Testing</span>
+    <span class="legend-chip"><span class="legend-swatch sw-container"></span>Containers</span>
+    <span class="legend-chip"><span class="legend-swatch sw-cicd"></span>CI/CD</span>
+    <span class="legend-chip"><span class="legend-swatch sw-monitor"></span>Monitoring</span>
+    <span class="legend-chip"><span class="legend-swatch sw-network"></span>Networking</span>
+    <span class="legend-sep"></span>
+    <span class="legend-note"><b>&#8594;</b> solid = process flow &nbsp;&nbsp; <b>&#8605;</b> dashed = feedback loop &nbsp;&nbsp; <b>&#9636;</b> shaded band = environment</span>
+    <span class="legend-sep"></span>
+    <span class="icon-key">
+      <span><svg><use href="#i-test"/></svg>tests</span>
+      <span><svg><use href="#i-container"/></svg>containers</span>
+      <span><svg><use href="#i-pipeline"/></svg>pipeline</span>
+      <span><svg><use href="#i-chart"/></svg>metrics</span>
+      <span><svg><use href="#i-alert"/></svg>alerts</span>
+      <span><svg><use href="#i-server"/></svg>servers</span>
+      <span><svg><use href="#i-database"/></svg>database</span>
+      <span><svg><use href="#i-network"/></svg>network</span>
+    </span>
+  </section>
+
+  <!-- ============ CENTRAL LIFECYCLE ============ -->
+  <section class="panel" id="sec-lifecycle">
+    <h2><svg width="20" height="20" style="color:#0f172a"><use href="#i-pipeline"/></svg> The Production Lifecycle <span class="tag">main flow</span></h2>
+    <p class="panel-desc">Every feature travels this path from a developer's keyboard to a running, monitored production service &mdash; and monitoring feeds what's learned back into new code and tests.</p>
+    <div class="lifecycle-wrap">
+      <svg viewBox="0 0 1620 400" xmlns="http://www.w3.org/2000/svg">
+        <!-- environment bands -->
+        <rect x="15" y="70" width="390" height="210" rx="14" fill="#eef2f7" stroke="#cbd5e1" stroke-width="1.3"/>
+        <text x="210" y="90" text-anchor="middle" font-size="12" font-weight="700" fill="#475569" letter-spacing="1">DEVELOPMENT</text>
+
+        <rect x="415" y="70" width="390" height="210" rx="14" fill="#f5f3ff" stroke="#ddd6fe" stroke-width="1.3"/>
+        <text x="610" y="90" text-anchor="middle" font-size="12" font-weight="700" fill="#6d28d9" letter-spacing="1">CI/CD BUILD &amp; STAGING</text>
+
+        <rect x="815" y="70" width="785" height="210" rx="14" fill="#fff7ed" stroke="#fed7aa" stroke-width="1.3"/>
+        <text x="1207" y="90" text-anchor="middle" font-size="12" font-weight="700" fill="#c2410c" letter-spacing="1">PRODUCTION</text>
+
+        <!-- nodes -->
+        <!-- 1 -->
+        <g>
+          <rect x="45" y="150" width="165" height="80" rx="10" fill="#ffffff" stroke="#1d4ed8" stroke-width="1.8"/>
+          <svg x="58" y="163" width="20" height="20"><use href="#i-code" style="color:#1d4ed8"/></svg>
+          <text x="95" y="180" font-size="12.2" font-weight="700" fill="#1e293b">Developer</text>
+          <text x="95" y="195" font-size="12.2" font-weight="700" fill="#1e293b">writes code</text>
+          <text x="95" y="212" font-size="9.6" fill="#64748b">feature branch, local build</text>
+        </g>
+        <!-- 2 -->
+        <g>
+          <rect x="245" y="150" width="165" height="80" rx="10" fill="#ffffff" stroke="#1d4ed8" stroke-width="1.8"/>
+          <svg x="258" y="163" width="20" height="20"><use href="#i-test" style="color:#1d4ed8"/></svg>
+          <text x="295" y="180" font-size="12.2" font-weight="700" fill="#1e293b">Automated</text>
+          <text x="295" y="195" font-size="12.2" font-weight="700" fill="#1e293b">testing</text>
+          <text x="295" y="212" font-size="9.6" fill="#64748b">unit, integration, e2e</text>
+        </g>
+        <!-- 3 -->
+        <g>
+          <rect x="445" y="150" width="165" height="80" rx="10" fill="#ffffff" stroke="#6d28d9" stroke-width="1.8"/>
+          <svg x="458" y="163" width="20" height="20"><use href="#i-pipeline" style="color:#6d28d9"/></svg>
+          <text x="495" y="180" font-size="12.2" font-weight="700" fill="#1e293b">CI/CD</text>
+          <text x="495" y="195" font-size="12.2" font-weight="700" fill="#1e293b">pipeline</text>
+          <text x="495" y="212" font-size="9.6" fill="#64748b">build, scan, gate</text>
+        </g>
+        <!-- 4 -->
+        <g>
+          <rect x="645" y="150" width="165" height="80" rx="10" fill="#ffffff" stroke="#0e7490" stroke-width="1.8"/>
+          <svg x="658" y="163" width="20" height="20"><use href="#i-container" style="color:#0e7490"/></svg>
+          <text x="695" y="180" font-size="12.2" font-weight="700" fill="#1e293b">Container</text>
+          <text x="695" y="195" font-size="12.2" font-weight="700" fill="#1e293b">image</text>
+          <text x="695" y="212" font-size="9.6" fill="#64748b">built &amp; pushed to registry</text>
+        </g>
+        <!-- 5 -->
+        <g>
+          <rect x="845" y="150" width="165" height="80" rx="10" fill="#ffffff" stroke="#c2410c" stroke-width="1.8"/>
+          <svg x="858" y="163" width="20" height="20"><use href="#i-server" style="color:#c2410c"/></svg>
+          <text x="895" y="180" font-size="12.2" font-weight="700" fill="#1e293b">Production</text>
+          <text x="895" y="195" font-size="12.2" font-weight="700" fill="#1e293b">deployment</text>
+          <text x="895" y="212" font-size="9.6" fill="#64748b">rolling / blue-green / canary</text>
+        </g>
+        <!-- 6 -->
+        <g>
+          <rect x="1045" y="150" width="165" height="80" rx="10" fill="#ffffff" stroke="#c2410c" stroke-width="1.8"/>
+          <svg x="1058" y="163" width="20" height="20"><use href="#i-network" style="color:#c2410c"/></svg>
+          <text x="1095" y="180" font-size="12.2" font-weight="700" fill="#1e293b">User network</text>
+          <text x="1095" y="195" font-size="12.2" font-weight="700" fill="#1e293b">request</text>
+          <text x="1095" y="212" font-size="9.6" fill="#64748b">DNS &#8594; LB &#8594; app &#8594; DB</text>
+        </g>
+        <!-- 7 -->
+        <g>
+          <rect x="1245" y="150" width="165" height="80" rx="10" fill="#ffffff" stroke="#c2410c" stroke-width="1.8"/>
+          <svg x="1258" y="163" width="20" height="20"><use href="#i-chart" style="color:#c2410c"/></svg>
+          <text x="1295" y="180" font-size="12.2" font-weight="700" fill="#1e293b">Monitoring</text>
+          <text x="1295" y="195" font-size="12.2" font-weight="700" fill="#1e293b">&amp; alerts</text>
+          <text x="1295" y="212" font-size="9.6" fill="#64748b">metrics, logs, traces</text>
+        </g>
+        <!-- 8 -->
+        <g>
+          <rect x="1445" y="150" width="150" height="80" rx="10" fill="#ffffff" stroke="#c2410c" stroke-width="1.8"/>
+          <svg x="1456" y="163" width="20" height="20"><use href="#i-magnifier" style="color:#c2410c"/></svg>
+          <text x="1520" y="180" font-size="11.6" font-weight="700" fill="#1e293b" text-anchor="middle">Engineer</text>
+          <text x="1520" y="195" font-size="11.6" font-weight="700" fill="#1e293b" text-anchor="middle">investigates &amp;</text>
+          <text x="1520" y="210" font-size="11.6" font-weight="700" fill="#1e293b" text-anchor="middle">improves code</text>
+        </g>
+
+        <!-- arrows between nodes -->
+        <g stroke="#334155" stroke-width="2.2" fill="none" marker-end="url(#arrowhead)">
+          <path d="M210 190 L243 190"/>
+          <path d="M410 190 L443 190"/>
+          <path d="M610 190 L643 190"/>
+          <path d="M810 190 L843 190"/>
+          <path d="M1010 190 L1043 190"/>
+          <path d="M1210 190 L1243 190"/>
+          <path d="M1410 190 L1443 190"/>
+        </g>
+
+        <!-- feedback arrow -->
+        <path d="M1520 232 C 1520 330, 210 330, 210 234" fill="none" stroke="#b45309" stroke-width="2.4" stroke-dasharray="7 5" marker-end="url(#arrowhead-gold)"/>
+        <text x="865" y="352" text-anchor="middle" font-size="12.5" font-weight="700" fill="#b45309">Feedback: monitoring &amp; investigation improve future code and tests</text>
+
+        <defs>
+          <marker id="arrowhead" markerWidth="9" markerHeight="9" refX="6.5" refY="4" orient="auto">
+            <path d="M0,0 L8,4 L0,8 Z" fill="#334155"/>
+          </marker>
+          <marker id="arrowhead-gold" markerWidth="9" markerHeight="9" refX="6.5" refY="4" orient="auto">
+            <path d="M0,0 L8,4 L0,8 Z" fill="#b45309"/>
+          </marker>
+        </defs>
+      </svg>
+    </div>
+    <div class="env-legend">
+      <span><span class="env-dot" style="background:#eef2f7;border:1px solid #cbd5e1"></span>Development &mdash; code is written and tested locally</span>
+      <span><span class="env-dot" style="background:#f5f3ff;border:1px solid #ddd6fe"></span>CI/CD Build &amp; Staging &mdash; automated pipeline builds and validates a release candidate</span>
+      <span><span class="env-dot" style="background:#fff7ed;border:1px solid #fed7aa"></span>Production &mdash; real users are served, and the system is monitored live</span>
+    </div>
+  </section>
+
+  <!-- ============ TOPIC SECTIONS ============ -->
+  <section class="topics-grid">
+
+    <!-- TESTING -->
+    <article class="card test" id="sec-testing">
+      <div class="card-head">
+        <svg><use href="#i-test"/></svg>
+        <div><h3>1&nbsp;&middot;&nbsp;Testing</h3><p class="purpose">"Verify correctness, prevent regressions, and measure behavior before deployment."</p></div>
+      </div>
+      <div class="card-body">
+        <h4 class="sub">The Test Pyramid <span style="font-weight:400; text-transform:none; letter-spacing:0; color:var(--ink-faint);">(tap a layer)</span></h4>
+        <div style="display:flex; gap:14px; align-items:flex-start; flex-wrap:wrap;">
+          <svg viewBox="0 0 300 200" width="220" height="150">
+            <polygon class="pyr-layer active" data-layer="unit" points="20,190 280,190 236.65,130 63.35,130" fill="#bfdbfe" stroke="#fff" stroke-width="2"/>
+            <polygon class="pyr-layer" data-layer="integration" points="63.35,130 236.65,130 193.35,70 106.65,70" fill="#60a5fa" stroke="#fff" stroke-width="2"/>
+            <polygon class="pyr-layer" data-layer="e2e" points="106.65,70 193.35,70 150,10" fill="#1d4ed8" stroke="#fff" stroke-width="2"/>
+            <text x="150" y="164" text-anchor="middle" font-size="12" font-weight="700" fill="#1e293b" style="pointer-events:none">Unit</text>
+            <text x="150" y="104" text-anchor="middle" font-size="11" font-weight="700" fill="#1e293b" style="pointer-events:none">Integration</text>
+            <text x="150" y="52" text-anchor="middle" font-size="10" font-weight="700" fill="#fff" style="pointer-events:none">E2E</text>
+          </svg>
+          <div class="pyramid-detail" id="pyramid-detail" style="flex:1; min-width:170px;">
+            <b>Unit &mdash; many, fast, isolated</b>
+            <p>Tests one function or class alone, with dependencies mocked out. Cheapest to write and run &mdash; that's why it's the base of the pyramid.</p>
+          </div>
+        </div>
+
+        <h4 class="sub">Testing Concepts</h4>
+        <p class="tap-hint">Tap any card to reveal its definition.</p>
+        <div class="chip-grid">
+          <div class="chip"><b>Functional testing</b><span>Does the feature behave as expected?</span></div>
+          <div class="chip"><b>Regression testing</b><span>Confirms new changes didn't break existing behavior.</span></div>
+          <div class="chip"><b>Smoke testing</b><span>Quick check that a build isn't fundamentally broken.</span></div>
+          <div class="chip"><b>Performance testing</b><span>Measures speed and responsiveness under normal use.</span></div>
+          <div class="chip"><b>Load testing</b><span>Checks behavior under expected/peak traffic levels.</span></div>
+          <div class="chip"><b>Stress testing</b><span>Pushes past normal limits to find the breaking point.</span></div>
+          <div class="chip"><b>Test automation</b><span>Tests run automatically, without manual effort.</span></div>
+          <div class="chip"><b>Test coverage</b><span>How much of the code is exercised by tests.</span></div>
+          <div class="chip"><b>Test environments</b><span>Dev, staging, and prod-like spaces to run tests in.</span></div>
+        </div>
+
+        <div class="quiz-box">
+          <div class="quiz-title">Pick the Right Test</div>
+          <p class="quiz-q" id="quiz-question"></p>
+          <div class="quiz-options" id="quiz-options"></div>
+          <div class="quiz-feedback" id="quiz-feedback"></div>
+          <div class="quiz-footer">
+            <span id="quiz-score">Score: 0 / 0</span>
+            <button type="button" id="quiz-next">Next question &#8594;</button>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- CONTAINERS -->
+    <article class="card container" id="sec-containers">
+      <div class="card-head">
+        <svg><use href="#i-container"/></svg>
+        <div><h3>2&nbsp;&middot;&nbsp;Containers</h3><p class="purpose">"Consistent, isolated application environments."</p></div>
+      </div>
+      <div class="card-body">
+        <h4 class="sub">From Code to Running Container</h4>
+        <div class="flow-strip">
+          <div class="flow-step player-stage" id="cs-0" data-stage="0">Dockerfile<small>recipe for the image</small></div><span class="flow-arrow">&#8594;</span>
+          <div class="flow-step player-stage" id="cs-1" data-stage="1">Container image<small>packaged, immutable</small></div><span class="flow-arrow">&#8594;</span>
+          <div class="flow-step player-stage" id="cs-2" data-stage="2">Image registry<small>e.g. Docker Hub, ECR</small></div><span class="flow-arrow">&#8594;</span>
+          <div class="flow-step player-stage" id="cs-3" data-stage="3">Running container<small>a live instance</small></div>
+        </div>
+        <div style="display:flex; align-items:center; gap:10px; margin:8px 0 4px; flex-wrap:wrap;">
+          <button type="button" id="container-play" class="runner-btn" style="background:var(--container)">&#9654; Play</button>
+          <p class="player-caption" id="container-caption">Press play to see how code becomes a running container.</p>
+        </div>
+
+        <h4 class="sub">Core Concepts</h4>
+        <p class="tap-hint">Tap any card to reveal its definition.</p>
+        <div class="chip-grid">
+          <div class="chip"><b>Code &amp; dependencies</b><span>Bundled together inside the image.</span></div>
+          <div class="chip"><b>Port mapping</b><span>Host port &#8596; container port.</span></div>
+          <div class="chip"><b>Environment variables</b><span>Runtime config injected into the container.</span></div>
+          <div class="chip"><b>Volumes</b><span>Persist data beyond the container's life.</span></div>
+          <div class="chip"><b>Container networking</b><span>Virtual networks let containers talk.</span></div>
+          <div class="chip"><b>Docker Compose</b><span>Define &amp; run multi-container apps together.</span></div>
+          <div class="chip"><b>Health checks</b><span>Automatic liveness / readiness probes.</span></div>
+          <div class="chip"><b>CPU &amp; memory limits</b><span>Cap resource usage per container.</span></div>
+          <div class="chip"><b>Container logs</b><span>stdout / stderr captured for debugging.</span></div>
+        </div>
+
+        <h4 class="sub">Example: Multi-Container App</h4>
+        <div class="mini-flow">
+          <div class="mini-box"><svg width="16" height="16" style="vertical-align:-3px"><use href="#i-server"/></svg> Web App Container</div>
+          <div class="mini-arrow">&#8596;</div>
+          <div class="mini-box"><svg width="16" height="16" style="vertical-align:-3px"><use href="#i-database"/></svg> Database Container</div>
+          <span style="font-size:10.3px; color:var(--ink-light);">connected via Docker Compose &amp; container network</span>
+        </div>
+
+        <h4 class="sub">Kubernetes Basics</h4>
+        <div class="k8s-row">
+          <div class="k8s-box"><b>Pod</b><span>smallest deployable unit; 1+ containers</span></div>
+          <span class="mini-arrow">&#8594;</span>
+          <div class="k8s-box"><b>Deployment</b><span>manages replicas of pods</span></div>
+          <span class="mini-arrow">&#8594;</span>
+          <div class="k8s-box"><b>Service</b><span>stable network endpoint for pods</span></div>
+        </div>
+
+        <div class="mini-sim" style="border-color:var(--container-border); background:var(--container-bg);">
+          <div class="sim-title" style="color:var(--container); text-transform:uppercase; font-size:12.5px; font-weight:800; letter-spacing:.05em;">Memory Limit Simulator</div>
+          <p class="sim-intro" style="font-size:11.3px; color:var(--ink-light);">Set a memory limit, then simulate a traffic spike. Too low, and Kubernetes kills the container.</p>
+          <div class="range-row" style="color:var(--container);">
+            <input type="range" id="mem-slider" min="64" max="512" step="32" value="256">
+            <span id="mem-value" style="font-weight:700; font-size:12px; color:var(--ink);">256 MB limit</span>
+            <button type="button" id="mem-test" class="runner-btn" style="background:var(--container);">Simulate load spike</button>
+          </div>
+          <div class="terminal" id="mem-terminal" style="margin-top:8px;"><span class="muted">$ waiting for load test...</span></div>
+        </div>
+      </div>
+    </article>
+
+    <!-- CI/CD -->
+    <article class="card cicd" id="sec-cicd">
+      <div class="card-head">
+        <svg><use href="#i-pipeline"/></svg>
+        <div><h3>3&nbsp;&middot;&nbsp;CI/CD</h3><p class="purpose">Automating build, test, and delivery of every change.</p></div>
+      </div>
+      <div class="card-body">
+        <h4 class="sub">Pipeline Stages</h4>
+        <div class="flow-strip" id="cicd-path">
+          <div class="flow-step cicd-step" id="cicd-step-0">Git push / PR</div><span class="flow-arrow">&#8594;</span>
+          <div class="flow-step cicd-step" id="cicd-step-1">Checkout code</div><span class="flow-arrow">&#8594;</span>
+          <div class="flow-step cicd-step" id="cicd-step-2">Install deps</div><span class="flow-arrow">&#8594;</span>
+          <div class="flow-step cicd-step" id="cicd-step-3">Lint</div><span class="flow-arrow">&#8594;</span>
+          <div class="flow-step cicd-step" id="cicd-step-4">Unit tests</div><span class="flow-arrow">&#8594;</span>
+          <div class="flow-step cicd-step" id="cicd-step-5">Integration tests</div><span class="flow-arrow">&#8594;</span>
+          <div class="flow-step cicd-step" id="cicd-step-6">Build image</div><span class="flow-arrow">&#8594;</span>
+          <div class="flow-step cicd-step" id="cicd-step-7">Security scan</div><span class="flow-arrow">&#8594;</span>
+          <div class="flow-step cicd-step" id="cicd-step-8">Push to registry</div><span class="flow-arrow">&#8594;</span>
+          <div class="flow-step cicd-step" id="cicd-step-9">Deploy to staging<span class="env-flag" style="background:#6d28d9">STAGING</span></div><span class="flow-arrow">&#8594;</span>
+          <div class="flow-step cicd-step" id="cicd-step-10">Smoke test</div><span class="flow-arrow">&#8594;</span>
+          <div class="flow-step cicd-step" id="cicd-step-11">Approval / quality gate</div><span class="flow-arrow">&#8594;</span>
+          <div class="flow-step cicd-step" id="cicd-step-12">Deploy to production<span class="env-flag" style="background:#c2410c">PROD</span></div><span class="flow-arrow">&#8594;</span>
+          <div class="flow-step cicd-step" id="cicd-step-13">Verify health</div><span class="flow-arrow">&#8594;</span>
+          <div class="flow-step cicd-step" id="cicd-step-14">Notify team</div>
+        </div>
+        <div class="runner-controls">
+          <select id="fail-select">
+            <option value="">No failure &mdash; happy path</option>
+            <option value="3">Inject failure at: Lint</option>
+            <option value="4">Inject failure at: Unit tests</option>
+            <option value="7">Inject failure at: Security scan</option>
+            <option value="11">Inject failure at: Approval / quality gate</option>
+          </select>
+          <button type="button" id="run-pipeline" class="runner-btn" style="background:var(--cicd);">&#9654; Run pipeline</button>
+          <button type="button" id="reset-pipeline" class="runner-btn reset">Reset</button>
+        </div>
+        <p class="player-caption" id="pipeline-caption">Ready &mdash; pick a failure point (or not) and press run.</p>
+
+        <h4 class="sub">Building Blocks</h4>
+        <p class="tap-hint">Tap any card to reveal its definition.</p>
+        <div class="chip-grid">
+          <div class="chip"><b>Workflow</b><span>The complete automated process.</span></div>
+          <div class="chip"><b>Job</b><span>A group of steps that run together.</span></div>
+          <div class="chip"><b>Step</b><span>A single command or action.</span></div>
+          <div class="chip"><b>Runner</b><span>The machine executing the workflow.</span></div>
+          <div class="chip"><b>Artifact</b><span>Generated build output, e.g. a binary or image.</span></div>
+          <div class="chip"><b>Secret</b><span>A protected credential used by the pipeline.</span></div>
+        </div>
+
+        <h4 class="sub">CI vs. Delivery vs. Deployment <span style="font-weight:400; text-transform:none; letter-spacing:0; color:var(--ink-faint);">(tap to see how far each one goes)</span></h4>
+        <div class="cicd-types">
+          <div class="cicd-type" data-through="6"><b>Continuous Integration</b><span>Build and test every change automatically.</span></div>
+          <div class="cicd-type" data-through="11"><b>Continuous Delivery</b><span>Validated code always stays ready to deploy.</span></div>
+          <div class="cicd-type" data-through="14"><b>Continuous Deployment</b><span>Validated code is deployed automatically, no manual step.</span></div>
+        </div>
+
+        <h4 class="sub">Deployment Strategies</h4>
+        <p class="tap-hint">Tap any card to reveal its definition.</p>
+        <div class="strategy-grid">
+          <div class="chip"><b>Rolling</b><span>Replace instances gradually, few at a time.</span></div>
+          <div class="chip"><b>Blue-green</b><span>Switch traffic between two full environments.</span></div>
+          <div class="chip"><b>Canary</b><span>Release to a small subset of users first.</span></div>
+          <div class="chip"><b>Rollback</b><span>Revert to a previous, known-good version.</span></div>
+        </div>
+      </div>
+    </article>
+
+    <!-- MONITORING -->
+    <article class="card monitor" id="sec-monitoring">
+      <div class="card-head">
+        <svg><use href="#i-chart"/></svg>
+        <div><h3>4&nbsp;&middot;&nbsp;Monitoring</h3><p class="purpose">"Detect, understand, and respond to production behavior."</p></div>
+      </div>
+      <div class="card-body">
+        <h4 class="sub">Three Pillars of Observability</h4>
+        <p class="tap-hint">Tap a pillar for a real example.</p>
+        <div class="pillars-row">
+          <div class="pillar"><b>Metrics</b><span>Numeric measurements over time.<br><code>http_requests_total{status="500"} 42</code></span></div>
+          <div class="pillar"><b>Logs</b><span>Timestamped, discrete event records.<br><code>ERROR payment failed: timeout 3000ms</code></span></div>
+          <div class="pillar"><b>Traces</b><span>The path of one request across services.<br><code>checkout &#8594; payment &#8594; db (340ms)</code></span></div>
+        </div>
+
+        <h4 class="sub">What Gets Measured</h4>
+        <p class="tap-hint">Tap any card to reveal its definition.</p>
+        <div class="chip-grid">
+          <div class="chip"><b>System</b><span>CPU, memory, disk capacity, disk I/O, network traffic</span></div>
+          <div class="chip"><b>Application</b><span>Request rate, response time, error rate, throughput</span></div>
+          <div class="chip"><b>Database</b><span>Query latency, slow queries, active connections, pool saturation, locks</span></div>
+        </div>
+
+        <h4 class="sub">The Four Golden Signals</h4>
+        <div class="golden">
+          <div>Latency</div><div>Traffic</div><div>Errors</div><div>Saturation</div>
+        </div>
+
+        <h4 class="sub">Incident Flow</h4>
+        <div class="flow-strip">
+          <div class="flow-step">Metric / log / trace</div><span class="flow-arrow">&#8594;</span>
+          <div class="flow-step">Dashboard</div><span class="flow-arrow">&#8594;</span>
+          <div class="flow-step">Alert</div><span class="flow-arrow">&#8594;</span>
+          <div class="flow-step">Engineer investigation</div><span class="flow-arrow">&#8594;</span>
+          <div class="flow-step">Mitigation</div><span class="flow-arrow">&#8594;</span>
+          <div class="flow-step">Root-cause analysis</div><span class="flow-arrow">&#8594;</span>
+          <div class="flow-step">Postmortem</div><span class="flow-arrow">&#8594;</span>
+          <div class="flow-step">Preventive improvement</div>
+        </div>
+
+        <h4 class="sub">Reliability Targets</h4>
+        <div class="chip-grid">
+          <div class="chip"><b>Health checks</b><span>Automated probes confirming a service is alive.</span></div>
+          <div class="chip"><b>Alert thresholds</b><span>Values that trigger a notification.</span></div>
+          <div class="chip"><b>SLI</b><span>Service Level Indicator &mdash; the measured value.</span></div>
+          <div class="chip"><b>SLO</b><span>Service Level Objective &mdash; the internal target.</span></div>
+          <div class="chip"><b>SLA</b><span>Service Level Agreement &mdash; the external promise.</span></div>
+        </div>
+
+        <div class="mini-sim" style="border-color:var(--monitor-border); background:var(--monitor-bg);">
+          <div class="sim-title" style="color:var(--monitor); text-transform:uppercase; font-size:12.5px; font-weight:800; letter-spacing:.05em;">Error Budget Calculator</div>
+          <p class="sim-intro" style="font-size:11.3px; color:var(--ink-light);">An SLO is a target for your SLI. Drag it and see how much downtime that "allows" &mdash; that's your error budget.</p>
+          <input type="range" id="slo-slider" min="0" max="4" step="1" value="1" style="width:100%; accent-color:var(--monitor);">
+          <div style="display:flex; justify-content:space-between; font-size:10px; color:var(--ink-faint); margin-top:2px;">
+            <span>99%</span><span>99.9%</span><span>99.95%</span><span>99.99%</span><span>99.999%</span>
+          </div>
+          <div class="stat-row">
+            <div><b id="slo-value" style="color:var(--monitor);">99.9%</b><div>SLO target</div></div>
+            <div><b id="budget-month" style="color:var(--ink);">43m 50s</b><div>allowed downtime / month</div></div>
+            <div><b id="budget-year" style="color:var(--ink);">8h 46m</b><div>allowed downtime / year</div></div>
+          </div>
+          <p style="font-size:10.7px; color:var(--ink-light); margin-top:8px;">A stricter SLO means a smaller error budget &mdash; less room for incidents before you breach your SLA. That's why teams don't always chase 100%: it's expensive, and usually unnecessary.</p>
+        </div>
+      </div>
+    </article>
+
+    <!-- NETWORKING -->
+    <article class="card network" id="sec-networking">
+      <div class="card-head">
+        <svg><use href="#i-network"/></svg>
+        <div><h3>5&nbsp;&middot;&nbsp;Networking</h3><p class="purpose">How a request travels from a user's browser to your app and back.</p></div>
+      </div>
+      <div class="card-body">
+        <h4 class="sub">Request Path</h4>
+        <div class="flow-strip" id="net-path">
+          <div class="flow-step net-step" id="net-step-browser">User browser</div><span class="flow-arrow">&#8594;</span>
+          <div class="flow-step net-step" id="net-step-dns">DNS lookup</div><span class="flow-arrow">&#8594;</span>
+          <div class="flow-step net-step" id="net-step-ip">Public IP</div><span class="flow-arrow">&#8594;</span>
+          <div class="flow-step net-step" id="net-step-firewall">Firewall</div><span class="flow-arrow">&#8594;</span>
+          <div class="flow-step net-step" id="net-step-lb">Load balancer / reverse proxy</div><span class="flow-arrow">&#8594;</span>
+          <div class="flow-step net-step" id="net-step-app">App container</div><span class="flow-arrow">&#8594;</span>
+          <div class="flow-step net-step" id="net-step-db">Database</div><span class="flow-arrow">&#8594;</span>
+          <div class="flow-step net-step" id="net-step-response">Response to user</div>
+        </div>
+        <p style="margin:4px 0 0; font-size:10.5px; color:var(--ink-faint);">This diagram lights up red/orange during the Incident Simulator below.</p>
+
+        <div class="mini-sim" style="border-color:var(--network-border); background:var(--network-bg);">
+          <div class="sim-title" style="color:var(--network); text-transform:uppercase; font-size:12.5px; font-weight:800; letter-spacing:.05em;">Zoom In: DNS &#8594; TCP &#8594; TLS &#8594; HTTP</div>
+          <p class="sim-intro" style="font-size:11.3px; color:var(--ink-light);">The Request Path above is the 10,000-foot view. Step through what actually happens on the wire before a single byte of the page arrives.</p>
+
+          <svg viewBox="0 0 400 90" class="journey-svg" xmlns="http://www.w3.org/2000/svg">
+            <rect x="8" y="24" width="86" height="42" rx="8" fill="#fff" stroke="var(--network)" stroke-width="1.6"/>
+            <text x="51" y="49" text-anchor="middle" font-size="11" font-weight="700" fill="#1e293b">Browser</text>
+            <rect x="306" y="24" width="86" height="42" rx="8" fill="#fff" stroke="var(--network)" stroke-width="1.6"/>
+            <text x="349" y="49" text-anchor="middle" font-size="11" font-weight="700" fill="#1e293b">Server</text>
+            <line x1="94" y1="45" x2="306" y2="45" stroke="#cbd5e1" stroke-width="1.5" stroke-dasharray="4 4"/>
+            <circle cx="180" cy="45" r="17" fill="#f8fafc" stroke="#94a3b8" stroke-width="1.2" stroke-dasharray="3 3"/>
+            <text x="180" y="48" text-anchor="middle" font-size="7.5" fill="#64748b">DNS</text>
+            <g id="journey-packet" style="transition:transform .6s ease;">
+              <circle cx="51" cy="45" r="8" fill="var(--network)"/>
+              <text id="journey-packet-label" x="51" y="30" text-anchor="middle" font-size="8.5" font-weight="800" fill="#1e293b">Query</text>
+            </g>
+          </svg>
+
+          <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin:6px 0;">
+            <span class="journey-phase" id="journey-phase">DNS RESOLUTION</span>
+            <span style="font-size:10.8px; color:var(--ink-faint);" id="journey-step-count">Step 1 / 12</span>
+          </div>
+          <p class="player-caption" id="journey-caption">Press play, or step through manually, to see what happens before the page loads.</p>
+
+          <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:8px;">
+            <button type="button" id="journey-prev" class="runner-btn reset">&#9664; Prev</button>
+            <button type="button" id="journey-play" class="runner-btn" style="background:var(--network);">&#9654; Play all</button>
+            <button type="button" id="journey-next" class="runner-btn reset">Next &#9654;</button>
+          </div>
+        </div>
+
+        <h4 class="sub">Core Concepts</h4>
+        <p class="tap-hint">Tap any card to reveal its definition.</p>
+        <div class="chip-grid">
+          <div class="chip"><b>IP address</b><span>A unique network address for a device.</span></div>
+          <div class="chip"><b>Port</b><span>A numbered doorway into a service on a host.</span></div>
+          <div class="chip"><b>DNS</b><span>Translates domain names to IP addresses.</span></div>
+          <div class="chip"><b>TCP</b><span>Reliable, ordered, connection-based transport.</span></div>
+          <div class="chip"><b>UDP</b><span>Fast, connectionless, no delivery guarantee.</span></div>
+          <div class="chip"><b>HTTP</b><span>Protocol for web requests and responses.</span></div>
+          <div class="chip"><b>HTTPS</b><span>HTTP encrypted with TLS.</span></div>
+          <div class="chip"><b>TLS encryption</b><span>Secures data in transit between parties.</span></div>
+          <div class="chip"><b>Router</b><span>Directs traffic between networks.</span></div>
+          <div class="chip"><b>Switch</b><span>Connects devices within one local network.</span></div>
+          <div class="chip"><b>Firewall</b><span>Filters traffic by rule to block/allow it.</span></div>
+          <div class="chip"><b>Proxy</b><span>Middleman that forwards requests on your behalf.</span></div>
+          <div class="chip"><b>Reverse proxy</b><span>Sits in front of servers, forwards to backends.</span></div>
+          <div class="chip"><b>Load balancer</b><span>Spreads traffic across multiple instances.</span></div>
+          <div class="chip"><b>NAT</b><span>Maps private addresses to a public one.</span></div>
+          <div class="chip"><b>Subnets</b><span>Smaller segments of a larger network.</span></div>
+          <div class="chip"><b>CIDR range</b><span>Compact notation for an IP address block.</span></div>
+          <div class="chip"><b>Latency</b><span>Time delay for data to travel.</span></div>
+          <div class="chip"><b>Bandwidth</b><span>Max data throughput of a connection.</span></div>
+          <div class="chip"><b>Packet loss</b><span>Data that fails to arrive at its destination.</span></div>
+        </div>
+
+        <div class="mini-sim" style="border-color:var(--network-border); background:var(--network-bg);">
+          <div class="sim-title" style="color:var(--network); text-transform:uppercase; font-size:12.5px; font-weight:800; letter-spacing:.05em;">CIDR / Subnet Calculator</div>
+          <p class="sim-intro" style="font-size:11.3px; color:var(--ink-light);">Type a CIDR block to see how many addresses it covers.</p>
+          <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+            <input type="text" id="cidr-input" class="cidr-input" value="192.168.1.0/24" style="color:var(--network);">
+            <button type="button" id="cidr-calc" class="runner-btn" style="background:var(--network);">Calculate</button>
+          </div>
+          <div class="terminal" id="cidr-output" style="margin-top:8px;"><span class="muted">$ enter a CIDR block, e.g. 10.0.0.0/16</span></div>
+        </div>
+
+        <h4 class="sub">Troubleshooting Toolbox</h4>
+        <div class="toolbox">
+          <div class="tool"><code>ping</code><span>Test reachability and latency</span></div>
+          <div class="tool"><code>curl</code><span>Test HTTP or API responses</span></div>
+          <div class="tool"><code>traceroute</code><span>Inspect the network path</span></div>
+          <div class="tool"><code>dig / nslookup</code><span>Inspect DNS</span></div>
+          <div class="tool"><code>ss</code><span>Inspect sockets and listening ports</span></div>
+          <div class="tool"><code>tcpdump</code><span>Inspect network packets</span></div>
+        </div>
+
+        <h4 class="sub">Incident Simulator &mdash; Debug Like a Production Engineer</h4>
+        <div class="sim-box">
+          <p class="sim-intro">Pick an incident below. The Request Path diagram above will show where it broke &mdash; then run tools from the toolbox to investigate, just like an on-call engineer would.</p>
+          <div class="scenario-row" id="scenario-row">
+            <button class="scenario-btn" data-scn="dns" type="button">DNS failure</button>
+            <button class="scenario-btn" data-scn="firewall" type="button">Firewall block</button>
+            <button class="scenario-btn" data-scn="lb" type="button">LB 502s</button>
+            <button class="scenario-btn" data-scn="app" type="button">App crash</button>
+            <button class="scenario-btn" data-scn="db" type="button">DB saturation</button>
+            <button class="scenario-btn" data-scn="packetloss" type="button">Packet loss</button>
+          </div>
+          <div class="alert-banner" id="alert-banner"></div>
+          <div class="tool-btn-row" id="tool-row">
+            <button class="tool-btn" data-tool="ping" type="button" disabled>ping</button>
+            <button class="tool-btn" data-tool="curl" type="button" disabled>curl</button>
+            <button class="tool-btn" data-tool="traceroute" type="button" disabled>traceroute</button>
+            <button class="tool-btn" data-tool="dig" type="button" disabled>dig</button>
+            <button class="tool-btn" data-tool="ss" type="button" disabled>ss</button>
+            <button class="tool-btn" data-tool="tcpdump" type="button" disabled>tcpdump</button>
+          </div>
+          <div class="terminal" id="sim-terminal"><span class="muted">$ select an incident above, then run a command...</span></div>
+          <div class="sim-actions">
+            <button class="sim-btn reveal" id="reveal-btn" type="button" disabled>Reveal root cause</button>
+            <button class="sim-btn reset" id="reset-btn" type="button">Reset</button>
+          </div>
+          <div class="diagnosis-box" id="diagnosis-box"></div>
+        </div>
+      </div>
+    </article>
+
+  </section>
+
+  <!-- ============ CROSS-TOPIC CONNECTIONS ============ -->
+  <section class="panel" id="sec-connections">
+    <h2>How the Five Topics Connect</h2>
+    <p class="panel-desc">No topic works in isolation &mdash; each feeds and depends on the others to keep production healthy.</p>
+    <div class="connections-wrap">
+      <svg viewBox="0 0 340 300" xmlns="http://www.w3.org/2000/svg">
+        <g stroke="#cbd5e1" stroke-width="1.4">
+          <line x1="170" y1="40" x2="290" y2="120"/>
+          <line x1="290" y1="120" x2="250" y2="255"/>
+          <line x1="250" y1="255" x2="90" y2="255"/>
+          <line x1="90" y1="255" x2="50" y2="120"/>
+          <line x1="50" y1="120" x2="170" y2="40"/>
+          <line x1="170" y1="40" x2="250" y2="255"/>
+          <line x1="170" y1="40" x2="90" y2="255"/>
+          <line x1="50" y1="120" x2="290" y2="120"/>
+        </g>
+        <g font-size="11.5" font-weight="700" fill="#fff" text-anchor="middle">
+          <circle cx="170" cy="40" r="30" fill="#1d4ed8"/><text x="170" y="44">Testing</text>
+          <circle cx="290" cy="120" r="30" fill="#6d28d9"/><text x="290" y="124">CI/CD</text>
+          <circle cx="250" cy="255" r="30" fill="#0e7490"/><text x="250" y="250">Contain-</text><text x="250" y="262">ers</text>
+          <circle cx="90" cy="255" r="30" fill="#c2410c"/><text x="90" y="250">Monitor-</text><text x="90" y="262">ing</text>
+          <circle cx="50" cy="120" r="30" fill="#15803d"/><text x="50" y="116">Network-</text><text x="50" y="128">ing</text>
+        </g>
+      </svg>
+      <ul class="connection-list">
+        <li><span class="dotgrp"><span class="dot" style="background:#1d4ed8"></span></span><span class="arrow-sm">&#8594;</span><span class="dotgrp"><span class="dot" style="background:#6d28d9"></span></span> Tests run inside the CI/CD pipeline.</li>
+        <li><span class="dotgrp"><span class="dot" style="background:#6d28d9"></span></span><span class="arrow-sm">&#8594;</span><span class="dotgrp"><span class="dot" style="background:#0e7490"></span></span> CI/CD builds and deploys container images.</li>
+        <li><span class="dotgrp"><span class="dot" style="background:#0e7490"></span></span><span class="arrow-sm">&#8594;</span><span class="dotgrp"><span class="dot" style="background:#15803d"></span></span> Container ports and networks allow services to communicate.</li>
+        <li><span class="dotgrp"><span class="dot" style="background:#15803d"></span></span><span class="arrow-sm">&#8594;</span><span class="dotgrp"><span class="dot" style="background:#c2410c"></span></span> Network traffic generates application metrics, logs, and traces.</li>
+        <li><span class="dotgrp"><span class="dot" style="background:#c2410c"></span></span><span class="arrow-sm">&#8594;</span><span class="dotgrp"><span class="dot" style="background:#0e7490"></span><span class="dot" style="background:#6d28d9"></span></span> Monitoring detects failures after deployment.</li>
+        <li><span class="dotgrp"><span class="dot" style="background:#c2410c"></span></span><span class="arrow-sm">&#8594;</span><span class="dotgrp"><span class="dot" style="background:#1d4ed8"></span></span> Monitoring results lead to new tests and code improvements.</li>
+        <li><span class="dotgrp"><span class="dot" style="background:#6d28d9"></span></span><span class="arrow-sm">&#8869;</span> Failed CI/CD quality gates stop unsafe deployments.</li>
+        <li><span class="dotgrp"><span class="dot" style="background:#0e7490"></span><span class="dot" style="background:#c2410c"></span><span class="dot" style="background:#6d28d9"></span></span><span class="arrow-sm">&#8596;</span> Health checks connect containers, deployment automation, and monitoring.</li>
+        <li><span class="dotgrp"><span class="dot" style="background:#0e7490"></span></span><span class="arrow-sm">&#8594;</span><span class="dotgrp"><span class="dot" style="background:#6d28d9"></span></span> Rollbacks use previous container images when production verification fails.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============ ON-CALL SIMULATOR ============ -->
+  <section class="panel" id="sec-oncall">
+    <h2>On-Call Simulator <span class="tag">capstone</span></h2>
+    <p class="panel-desc">Twelve incidents pulled from all five topics, one shift, a clock ticking on every one. Diagnose fast <em>and</em> correctly &mdash; just like a real on-call rotation. (Inspired by Google SRE's "Wheel of Misfortune" training exercise.)</p>
+
+    <div id="oncall-idle">
+      <button type="button" id="oncall-start" class="runner-btn" style="background:#0f172a;">&#9654; Start Shift</button>
+    </div>
+
+    <div id="oncall-game" style="display:none;">
+      <div class="oncall-meta">
+        <span id="oncall-round-label">Round 1 / 12</span>
+        <span id="oncall-score-label">Score: 0</span>
+      </div>
+      <div class="oncall-timerbar"><div class="oncall-timerfill" id="oncall-timerfill"></div></div>
+      <p style="margin:0 0 8px;">
+        <span class="oncall-topic-tag" id="oncall-topic-tag"></span>
+        <span id="oncall-alert-text" style="font-size:12.5px; font-weight:600; color:var(--ink);"></span>
+      </p>
+      <div class="oncall-actions" id="oncall-actions"></div>
+      <p class="quiz-feedback" id="oncall-feedback"></p>
+      <button type="button" id="oncall-continue" class="runner-btn" style="background:#0f172a; display:none;">Continue &#8594;</button>
+    </div>
+
+    <div id="oncall-summary" style="display:none;"></div>
+  </section>
+
+  <!-- ============ TAKEAWAY ============ -->
+  <section class="takeaway" id="sec-takeaway">
+    <h2>Learning Takeaway</h2>
+    <p>"Production Engineering combines automated testing, repeatable deployments, reliable runtime environments, network understanding, and continuous monitoring to keep software available, performant, and safe."</p>
+  </section>
+
+  <footer class="note">Production Engineering Learning Map &middot; study reference for PE / SRE / DevOps / infrastructure interviews</footer>
+
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  var SCENARIOS = {
+    dns: {
+      label: "DNS failure", node: "dns", state: "broken",
+      alert: "🔴 CRITICAL — users report “site can't be reached”. Error rate near 100%.",
+      alertClass: "crit",
+      tools: {
+        ping: "$ ping api.example.com\nping: cannot resolve api.example.com: Unknown host",
+        curl: "$ curl -v https://api.example.com\n*   Could not resolve host: api.example.com\ncurl: (6) Could not resolve host: api.example.com",
+        traceroute: "$ traceroute api.example.com\ntraceroute: unknown host api.example.com",
+        dig: "$ dig api.example.com\n;; connection timed out; no servers could be reached\n;; ANSWER: 0 records",
+        ss: "$ ss -tlnp\n(local sockets look normal — this is a DNS problem, not a listening-port problem)",
+        tcpdump: "$ tcpdump port 53\n14:02:01 IP client.53211 > 10.0.0.2.53: A? api.example.com.\n(no response received — DNS server not answering)"
+      },
+      keyTools: ["dig", "tcpdump"],
+      diagnosis: "The DNS record for api.example.com isn't resolving — likely a misconfigured record or a DNS server outage. <b>dig</b> and <b>tcpdump</b> confirm queries go out but get no answer.<br><b>Fix:</b> check the DNS provider/zone, verify the A/CNAME record, and confirm the resolver is reachable."
+    },
+    firewall: {
+      label: "Firewall block", node: "firewall", state: "broken",
+      alert: "🔴 CRITICAL — connection timeouts on port 443 from external clients.",
+      alertClass: "crit",
+      tools: {
+        ping: "$ ping 203.0.113.10\n64 bytes from 203.0.113.10: icmp_seq=1 ttl=54 time=12ms\n(host responds to ICMP — inconclusive, ICMP is often allowed even when TCP is blocked)",
+        curl: "$ curl -v https://api.example.com\n*   Trying 203.0.113.10:443...\n* connect() timed out!\ncurl: (28) Connection timed out",
+        traceroute: "$ traceroute 203.0.113.10\n...\n 8  203.0.113.9   12ms\n 9  * * *\n10  * * *\n(trace stops right before the host)",
+        dig: "$ dig api.example.com\napi.example.com. 300 IN A 203.0.113.10\n(DNS resolves correctly — rules out DNS)",
+        ss: "$ ss -tlnp   (on the app host)\nLISTEN 0 128 0.0.0.0:443 users:((\"nginx\",pid=1122))\n(app IS listening — rules out the app being down)",
+        tcpdump: "$ tcpdump port 443   (on the app host)\n(no SYN packets arriving — traffic is being dropped upstream)"
+      },
+      keyTools: ["traceroute", "tcpdump"],
+      diagnosis: "A firewall or security-group rule is dropping inbound traffic on port 443 before it reaches the app. DNS resolves and the app is listening, but the TCP handshake never completes — <b>traceroute</b> stops short and <b>tcpdump</b> shows no SYNs arriving.<br><b>Fix:</b> check firewall / security-group rules and confirm port 443 is open from the internet."
+    },
+    lb: {
+      label: "LB 502s", node: "lb", state: "broken",
+      alert: "🔴 CRITICAL — 502 Bad Gateway spike, error rate 38%.",
+      alertClass: "crit",
+      tools: {
+        ping: "$ ping api.example.com\n64 bytes from lb: icmp_seq=1 ttl=57 time=8ms\n(load balancer host is reachable)",
+        curl: "$ curl -i https://api.example.com/health\nHTTP/1.1 502 Bad Gateway",
+        traceroute: "$ traceroute api.example.com\n(reaches the load balancer fine — problem is beyond L3)",
+        dig: "$ dig api.example.com\napi.example.com. 300 IN A 203.0.113.10 (resolves fine)",
+        ss: "$ ss -tlnp   (on an app host)\n(empty — nothing listening on port 8080)",
+        tcpdump: "$ tcpdump port 8080   (on the LB)\nSYN sent to backend 10.0.1.5:8080 — no SYN-ACK received"
+      },
+      keyTools: ["ss", "tcpdump"],
+      diagnosis: "The load balancer has no healthy backend targets — the app containers behind it aren't listening on the expected port (crashed or still starting). <b>ss</b> on a backend shows nothing listening; <b>tcpdump</b> on the LB shows connection attempts going unanswered.<br><b>Fix:</b> check backend health checks, restart/redeploy the app containers, confirm the listen port matches the LB target port."
+    },
+    app: {
+      label: "App crash", node: "app", state: "broken",
+      alert: "🔴 CRITICAL — health check failing, pod in CrashLoopBackOff.",
+      alertClass: "crit",
+      tools: {
+        ping: "$ ping api.example.com\n(host reachable — the VM/node is up, only the app process is down)",
+        curl: "$ curl -i https://api.example.com/\ncurl: (7) Failed to connect: Connection refused",
+        traceroute: "$ traceroute api.example.com\n(reaches the app host fine)",
+        dig: "$ dig api.example.com\n(resolves fine)",
+        ss: "$ ss -tlnp\n(empty — nothing listening on port 8080)",
+        tcpdump: "$ tcpdump port 8080\n(SYNs arrive but get RST — port closed, no process bound)"
+      },
+      keyTools: ["ss", "curl"],
+      diagnosis: "The application container is crashing on startup (CrashLoopBackOff), so nothing is listening on its port — <b>ss</b> shows an empty listener list and <b>curl</b> gets “connection refused.”<br><b>Fix:</b> check container logs for the startup error, fix the underlying bug/config, and redeploy or roll back to the last healthy image."
+    },
+    db: {
+      label: "DB saturation", node: "db", state: "broken",
+      alert: "🟠 WARNING — p99 latency 8.4s, error rate rising (golden signal: Saturation).",
+      alertClass: "warn",
+      tools: {
+        ping: "$ ping db.internal\n(reachable, low latency — the network path is fine)",
+        curl: "$ curl -w \"time_total: %{time_total}\\n\" -o /dev/null -s https://api.example.com/orders\ntime_total: 8.420  (then HTTP 500)",
+        traceroute: "$ traceroute db.internal\n(short, healthy path — not a network issue)",
+        dig: "$ dig db.internal\n(resolves fine)",
+        ss: "$ ss -tn state established '( dport = :5432 )' | wc -l\n100   (pool max is 100 — fully saturated)",
+        tcpdump: "$ tcpdump port 5432\n(high volume of SYN retries — new connections queueing behind the full pool)"
+      },
+      keyTools: ["ss", "curl"],
+      diagnosis: "The database connection pool is saturated (100/100) — a slow query or a burst of traffic is holding connections, so new requests queue and time out. <b>ss</b> confirms the pool is maxed; <b>curl</b> shows request time climbing toward the timeout.<br><b>Fix:</b> find and optimize the slow query, add an index, increase pool size / add a read replica, and add circuit-breaking so it fails fast instead of queueing forever."
+    },
+    packetloss: {
+      label: "Packet loss", node: "lb", state: "warn",
+      alert: "🟠 WARNING — intermittent 5xxs and latency spikes, ~15-20% packet loss reported on one hop.",
+      alertClass: "warn",
+      tools: {
+        ping: "$ ping api.example.com\n5 packets transmitted, 4 received, 20% packet loss, avg rtt 340ms",
+        curl: "$ for i in 1 2 3 4 5; do curl -o /dev/null -s -w \"%{time_total}\\n\" https://api.example.com; done\n0.21\n0.34\nTIMEOUT\n0.26\nTIMEOUT",
+        traceroute: "$ traceroute api.example.com\n... 6  10.0.4.1    2ms\n... 7  10.0.4.2  340ms  *  410ms   <- lossy/slow hop\n... 8  203.0.113.10  45ms",
+        dig: "$ dig api.example.com\n(resolves fine, fast)",
+        ss: "$ ss -ti\n(elevated retransmit counters on active connections)",
+        tcpdump: "$ tcpdump -i eth0\n...[TCP Retransmission] repeated across multiple flows"
+      },
+      keyTools: ["ping", "traceroute"],
+      diagnosis: "This isn't a hard outage — it's intermittent packet loss on one network hop (a congested link or flaky router), causing retransmissions, timeouts, and inconsistent latency. <b>ping</b> shows the loss rate directly, and <b>traceroute</b> pinpoints which hop is lossy.<br><b>Fix:</b> escalate the lossy hop to network/infra (or your cloud provider), consider rerouting, and add client-side retry with backoff in the meantime."
+    }
+  };
+
+  var currentScenario = null;
+
+  function $(sel, root){ return (root || document).querySelector(sel); }
+  function $all(sel, root){ return Array.prototype.slice.call((root || document).querySelectorAll(sel)); }
+
+  function selectScenario(id){
+    currentScenario = id;
+    var s = SCENARIOS[id];
+
+    $all(".net-step").forEach(function(el){ el.classList.remove("is-broken", "is-warn"); });
+    var nodeEl = document.getElementById("net-step-" + s.node);
+    if (nodeEl) nodeEl.classList.add(s.state === "warn" ? "is-warn" : "is-broken");
+
+    var banner = $("#alert-banner");
+    banner.textContent = s.alert;
+    banner.className = "alert-banner show " + s.alertClass;
+
+    $all(".scenario-btn").forEach(function(b){ b.classList.toggle("active", b.dataset.scn === id); });
+    $all(".tool-btn").forEach(function(b){ b.disabled = false; b.classList.remove("key-tool"); });
+
+    $("#sim-terminal").innerHTML = '<span class="muted">$ incident selected: ' + s.label + ". Run a command below to investigate...</span>";
+
+    var diag = $("#diagnosis-box");
+    diag.classList.remove("show");
+    diag.innerHTML = "";
+    $("#reveal-btn").disabled = false;
+  }
+
+  function runTool(tool){
+    if (!currentScenario) return;
+    var s = SCENARIOS[currentScenario];
+    var term = $("#sim-terminal");
+    if (term.querySelector(".muted")) term.innerHTML = "";
+    var line = document.createElement("div");
+    line.style.marginBottom = "9px";
+    line.textContent = s.tools[tool];
+    term.appendChild(line);
+    term.scrollTop = term.scrollHeight;
+  }
+
+  function revealDiagnosis(){
+    if (!currentScenario) return;
+    var s = SCENARIOS[currentScenario];
+    var diag = $("#diagnosis-box");
+    diag.innerHTML = "<b>Root cause &amp; fix:</b><br>" + s.diagnosis;
+    diag.classList.add("show");
+    s.keyTools.forEach(function(t){
+      var btn = document.querySelector('.tool-btn[data-tool="' + t + '"]');
+      if (btn) btn.classList.add("key-tool");
+    });
+  }
+
+  function resetSim(){
+    currentScenario = null;
+    $all(".net-step").forEach(function(el){ el.classList.remove("is-broken", "is-warn"); });
+    $all(".scenario-btn").forEach(function(b){ b.classList.remove("active"); });
+    $all(".tool-btn").forEach(function(b){ b.disabled = true; b.classList.remove("key-tool"); });
+    var banner = $("#alert-banner");
+    banner.className = "alert-banner";
+    banner.textContent = "";
+    $("#sim-terminal").innerHTML = '<span class="muted">$ select an incident above, then run a command...</span>';
+    $("#diagnosis-box").classList.remove("show");
+    $("#diagnosis-box").innerHTML = "";
+    $("#reveal-btn").disabled = true;
+  }
+
+  document.addEventListener("DOMContentLoaded", function(){
+    $all(".scenario-btn").forEach(function(b){
+      b.addEventListener("click", function(){ selectScenario(b.dataset.scn); });
+    });
+    $all(".tool-btn").forEach(function(b){
+      b.addEventListener("click", function(){ runTool(b.dataset.tool); });
+    });
+    $("#reveal-btn").addEventListener("click", revealDiagnosis);
+    $("#reset-btn").addEventListener("click", resetSim);
+
+    // scroll-spy for the top nav
+    var sections = $all('[id^="sec-"]');
+    var navLinks = $all(".nav-link");
+    if ("IntersectionObserver" in window && sections.length){
+      var obs = new IntersectionObserver(function(entries){
+        entries.forEach(function(e){
+          if (e.isIntersecting){
+            navLinks.forEach(function(l){ l.classList.remove("active"); });
+            var link = document.querySelector('.nav-link[href="#' + e.target.id + '"]');
+            if (link) link.classList.add("active");
+          }
+        });
+      }, { rootMargin: "-35% 0px -55% 0px", threshold: 0 });
+      sections.forEach(function(s){ obs.observe(s); });
+    }
+  });
+
+  // ================= section interactivity =================
+
+  // ---------- generic reveal chips (chip / pillar / cicd-type) ----------
+  function initReveal(){
+    $all(".chip, .pillar, .cicd-type").forEach(function(el){
+      el.setAttribute("tabindex", "0");
+      el.setAttribute("role", "button");
+      el.setAttribute("aria-expanded", "false");
+    });
+    document.addEventListener("click", function(e){
+      var el = e.target.closest(".chip, .pillar, .cicd-type");
+      if (!el) return;
+      var open = el.classList.toggle("open");
+      el.setAttribute("aria-expanded", open ? "true" : "false");
+    });
+    document.addEventListener("keydown", function(e){
+      if (e.key !== "Enter" && e.key !== " ") return;
+      var el = e.target.closest && e.target.closest(".chip, .pillar, .cicd-type");
+      if (!el) return;
+      e.preventDefault();
+      var open = el.classList.toggle("open");
+      el.setAttribute("aria-expanded", open ? "true" : "false");
+    });
+  }
+
+  // ---------- testing: clickable pyramid ----------
+  var PYRAMID_DETAIL = {
+    unit: { title: "Unit — many, fast, isolated", text: "Tests one function or class alone, with dependencies mocked out. Cheapest to write and run — that's why it's the base of the pyramid." },
+    integration: { title: "Integration — fewer, moderate", text: "Tests how two or more real components work together (e.g. a service plus a database), catching issues unit tests miss." },
+    e2e: { title: "E2E — few, slow, high confidence", text: "Drives the whole system like a real user would. Highest confidence, but slow and expensive — so there are only a few." }
+  };
+  function initPyramid(){
+    var layers = $all(".pyr-layer");
+    if (!layers.length) return;
+    layers.forEach(function(el){
+      el.addEventListener("click", function(){
+        layers.forEach(function(l){ l.classList.remove("active"); });
+        el.classList.add("active");
+        var d = PYRAMID_DETAIL[el.dataset.layer];
+        $("#pyramid-detail").innerHTML = "<b>" + d.title + "</b><p>" + d.text + "</p>";
+      });
+    });
+  }
+
+  // ---------- testing: quiz ----------
+  var QUIZ = [
+    { q: "You changed how tax is calculated inside a single pricing function. What catches a bug here fastest?", opts: ["unit","integration","e2e","smoke"], answer: "unit", explain: "A unit test isolates just that function and runs in milliseconds — perfect for pinpointing logic bugs fast." },
+    { q: "You want to confirm the checkout service correctly talks to the payment service and the inventory service together.", opts: ["unit","integration","e2e","smoke"], answer: "integration", explain: "Integration tests verify multiple components work correctly together, not just in isolation." },
+    { q: "You want to confirm a user can sign up, add an item to their cart, and check out — for real, in the UI.", opts: ["unit","integration","e2e","smoke"], answer: "e2e", explain: "End-to-end tests simulate a full real user journey across the whole system." },
+    { q: "Right after deploying a new build, you want a 30-second check that the app didn't completely break.", opts: ["unit","e2e","smoke","regression"], answer: "smoke", explain: "Smoke tests are quick sanity checks run right after a build/deploy to catch fundamental breakage." },
+    { q: "You just merged a bug fix. How do you make sure it didn't break features that used to work?", opts: ["smoke","load","regression","stress"], answer: "regression", explain: "Regression tests re-run existing test suites to confirm old behavior still works after a change." },
+    { q: "You want to know if the checkout API stays fast when 10,000 users hit it at once, like on Black Friday.", opts: ["unit","load","smoke","integration"], answer: "load", explain: "Load testing checks behavior under expected/peak traffic levels." },
+    { q: "You want to find the exact point where the system falls over — way past normal traffic.", opts: ["stress","smoke","unit","regression"], answer: "stress", explain: "Stress testing pushes past normal limits on purpose, to find the breaking point." }
+  ];
+  var OPT_LABELS = { unit:"Unit", integration:"Integration", e2e:"End-to-End", smoke:"Smoke", regression:"Regression", load:"Load", stress:"Stress" };
+  var quizOrder = [], quizIdx = 0, quizScore = 0, quizTotal = 0;
+
+  function shuffle(arr){
+    var a = arr.slice();
+    for (var i = a.length - 1; i > 0; i--){
+      var j = Math.floor(Math.random() * (i + 1));
+      var t = a[i]; a[i] = a[j]; a[j] = t;
+    }
+    return a;
+  }
+
+  function renderQuiz(){
+    var item = QUIZ[quizOrder[quizIdx]];
+    $("#quiz-question").textContent = item.q;
+    var optsEl = $("#quiz-options");
+    optsEl.innerHTML = "";
+    item.opts.forEach(function(opt){
+      var btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "quiz-opt";
+      btn.textContent = OPT_LABELS[opt] || opt;
+      btn.dataset.choice = opt;
+      btn.addEventListener("click", function(){ answerQuiz(opt, item, btn, optsEl); });
+      optsEl.appendChild(btn);
+    });
+    $("#quiz-feedback").textContent = "";
+    $("#quiz-score").textContent = "Score: " + quizScore + " / " + quizTotal;
+  }
+
+  function answerQuiz(choice, item, btn, optsEl){
+    $all(".quiz-opt", optsEl).forEach(function(b){ b.disabled = true; });
+    quizTotal++;
+    var correct = choice === item.answer;
+    if (correct){
+      quizScore++;
+      btn.classList.add("correct");
+    } else {
+      btn.classList.add("incorrect");
+      var correctBtn = optsEl.querySelector('[data-choice="' + item.answer + '"]');
+      if (correctBtn) correctBtn.classList.add("correct");
+    }
+    $("#quiz-feedback").textContent = (correct ? "✅ Correct — " : "❌ Not quite — ") + item.explain;
+    $("#quiz-score").textContent = "Score: " + quizScore + " / " + quizTotal;
+  }
+
+  function nextQuiz(){
+    quizIdx++;
+    if (quizIdx >= quizOrder.length){
+      quizOrder = shuffle(QUIZ.map(function(_, i){ return i; }));
+      quizIdx = 0;
+    }
+    renderQuiz();
+  }
+
+  function initQuiz(){
+    if (!$("#quiz-question")) return;
+    quizOrder = shuffle(QUIZ.map(function(_, i){ return i; }));
+    renderQuiz();
+    $("#quiz-next").addEventListener("click", nextQuiz);
+  }
+
+  // ---------- containers: lifecycle player ----------
+  var CONTAINER_CAPTIONS = [
+    "Step 1 — the Dockerfile defines how to build the image: base OS, dependencies, app code, start command.",
+    'Step 2 — "docker build" packages everything into an immutable container image.',
+    "Step 3 — the image is pushed to a registry (Docker Hub, ECR, GCR) so it can be pulled anywhere.",
+    'Step 4 — "docker run" (or Kubernetes) pulls the image and starts a running container from it.'
+  ];
+  function initContainerPlayer(){
+    var btn = $("#container-play");
+    if (!btn) return;
+    var stages = $all(".player-stage");
+    var playing = false;
+    btn.addEventListener("click", function(){
+      if (playing) return;
+      playing = true;
+      btn.disabled = true;
+      stages.forEach(function(s){ s.classList.remove("active", "done"); });
+      var i = 0;
+      function step(){
+        if (i > 0) { stages[i - 1].classList.remove("active"); stages[i - 1].classList.add("done"); }
+        if (i >= stages.length){
+          playing = false;
+          btn.disabled = false;
+          btn.innerHTML = "▶ Replay";
+          $("#container-caption").textContent = "Done — the image is now a running container instance.";
+          return;
+        }
+        stages[i].classList.add("active");
+        $("#container-caption").textContent = CONTAINER_CAPTIONS[i];
+        i++;
+        setTimeout(step, 750);
+      }
+      step();
+    });
+  }
+
+  // ---------- containers: memory limit simulator ----------
+  function initMemSim(){
+    var slider = $("#mem-slider");
+    if (!slider) return;
+    var valueEl = $("#mem-value");
+    slider.addEventListener("input", function(){ valueEl.textContent = slider.value + " MB limit"; });
+    $("#mem-test").addEventListener("click", function(){
+      var limit = parseInt(slider.value, 10);
+      var peak = 300 + Math.round(Math.random() * 220);
+      var term = $("#mem-terminal");
+      term.innerHTML = "";
+      var lines = ["$ kubectl top pod web-app-7c9f   (during load spike)"];
+      if (peak > limit){
+        lines.push("CPU: 340m   MEMORY: " + limit + "Mi / " + limit + "Mi");
+        lines.push("Warning: MemoryPressure");
+        lines.push("Killing process 1 (node) - OOMKilled");
+        lines.push("💥 OOMKilled — usage tried to reach ~" + peak + "MB but the limit was " + limit + "MB. Kubernetes restarted the container.");
+      } else {
+        lines.push("CPU: 210m   MEMORY: " + peak + "Mi / " + limit + "Mi");
+        lines.push("✅ Healthy — usage peaked around " + peak + "MB, comfortably under the " + limit + "MB limit.");
+      }
+      lines.forEach(function(l){
+        var d = document.createElement("div");
+        d.textContent = l;
+        term.appendChild(d);
+      });
+    });
+  }
+
+  // ---------- ci/cd: pipeline runner + CI/CD-type highlight ----------
+  var CICD_STAGE_NAMES = ["Git push / PR","Checkout code","Install deps","Lint","Unit tests","Integration tests","Build image","Security scan","Push to registry","Deploy to staging","Smoke test","Approval / quality gate","Deploy to production","Verify health","Notify team"];
+  function initPipelineRunner(){
+    var runBtn = $("#run-pipeline");
+    if (!runBtn) return;
+    var steps = [];
+    for (var i = 0; i < 15; i++){ steps.push(document.getElementById("cicd-step-" + i)); }
+    var resetBtn = $("#reset-pipeline");
+    var caption = $("#pipeline-caption");
+    var failSelect = $("#fail-select");
+    var running = false;
+
+    function clearSteps(){
+      steps.forEach(function(s){ s.classList.remove("running", "passed", "failed", "skipped", "ci-focus"); });
+    }
+
+    runBtn.addEventListener("click", function(){
+      if (running) return;
+      running = true;
+      runBtn.disabled = true;
+      clearSteps();
+      var failAt = failSelect.value === "" ? -1 : parseInt(failSelect.value, 10);
+      var i = 0;
+      function tick(){
+        if (i > 0){
+          var prev = steps[i - 1];
+          prev.classList.remove("running");
+          prev.classList.add((i - 1 === failAt) ? "failed" : "passed");
+          if (i - 1 === failAt){
+            for (var j = i; j < steps.length; j++){ steps[j].classList.add("skipped"); }
+            caption.textContent = "🚫 Pipeline stopped at “" + CICD_STAGE_NAMES[failAt] + "” — later stages were blocked. This is the quality gate protecting production.";
+            running = false;
+            runBtn.disabled = false;
+            return;
+          }
+        }
+        if (i >= steps.length){
+          caption.textContent = "✅ Pipeline passed every stage — deployed to production and the team was notified.";
+          running = false;
+          runBtn.disabled = false;
+          return;
+        }
+        steps[i].classList.add("running");
+        caption.textContent = "Running: " + CICD_STAGE_NAMES[i] + "…";
+        i++;
+        setTimeout(tick, 280);
+      }
+      tick();
+    });
+
+    resetBtn.addEventListener("click", function(){
+      clearSteps();
+      failSelect.value = "";
+      caption.textContent = "Ready — pick a failure point (or not) and press run.";
+      runBtn.disabled = false;
+      running = false;
+    });
+
+    $all(".cicd-type").forEach(function(el){
+      el.addEventListener("click", function(){
+        var through = parseInt(el.dataset.through, 10);
+        steps.forEach(function(s, idx){ s.classList.toggle("ci-focus", idx <= through); });
+      });
+    });
+  }
+
+  // ---------- monitoring: error budget calculator ----------
+  function initErrorBudget(){
+    var slider = $("#slo-slider");
+    if (!slider) return;
+    var SLO_VALUES = [99, 99.9, 99.95, 99.99, 99.999];
+    var MIN_PER_MONTH = 43829.1;
+    var MIN_PER_YEAR = 525949.2;
+
+    function formatMinutes(totalMin){
+      var totalSec = Math.round(totalMin * 60);
+      var d = Math.floor(totalSec / 86400); totalSec -= d * 86400;
+      var h = Math.floor(totalSec / 3600); totalSec -= h * 3600;
+      var m = Math.floor(totalSec / 60); totalSec -= m * 60;
+      var s = totalSec;
+      if (d > 0) return d + "d " + h + "h";
+      if (h > 0) return h + "h " + m + "m";
+      if (m > 0) return m + "m " + s + "s";
+      return s + "s";
+    }
+
+    function update(){
+      var idx = parseInt(slider.value, 10);
+      var pct = SLO_VALUES[idx];
+      var downtimeFrac = (100 - pct) / 100;
+      $("#slo-value").textContent = pct + "%";
+      $("#budget-month").textContent = formatMinutes(downtimeFrac * MIN_PER_MONTH);
+      $("#budget-year").textContent = formatMinutes(downtimeFrac * MIN_PER_YEAR);
+    }
+    slider.addEventListener("input", update);
+    update();
+  }
+
+  // ---------- networking: cidr calculator ----------
+  function ipToInt(ip){
+    var parts = ip.split(".");
+    if (parts.length !== 4) return null;
+    var n = 0;
+    for (var i = 0; i < 4; i++){
+      var p = parseInt(parts[i], 10);
+      if (isNaN(p) || p < 0 || p > 255) return null;
+      n = n * 256 + p;
+    }
+    return n >>> 0;
+  }
+  function intToIp(n){
+    return [(n >>> 24) & 255, (n >>> 16) & 255, (n >>> 8) & 255, n & 255].join(".");
+  }
+  function initCidr(){
+    var btn = $("#cidr-calc");
+    if (!btn) return;
+    function calc(){
+      var out = $("#cidr-output");
+      var raw = $("#cidr-input").value.trim();
+      var m = raw.match(/^(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})\/(\d{1,2})$/);
+      if (!m){ out.innerHTML = '<span class="muted">Enter a valid CIDR block, e.g. 10.0.0.0/16</span>'; return; }
+      var ip = m[1], prefix = parseInt(m[2], 10);
+      var ipInt = ipToInt(ip);
+      if (ipInt === null || prefix < 0 || prefix > 32){ out.innerHTML = '<span class="muted">Enter a valid CIDR block, e.g. 10.0.0.0/16</span>'; return; }
+      var hostBits = 32 - prefix;
+      var total = Math.pow(2, hostBits);
+      var mask = (hostBits === 32) ? 0 : (~0 << hostBits) >>> 0;
+      var network = (ipInt & mask) >>> 0;
+      var broadcast = (hostBits === 0) ? network : (network | (~mask >>> 0)) >>> 0;
+      var usable = total <= 2 ? total : total - 2;
+      out.textContent =
+        "$ cidr " + ip + "/" + prefix + "\n" +
+        "Network address:   " + intToIp(network) + "\n" +
+        "Broadcast address: " + intToIp(broadcast) + "\n" +
+        "Total addresses:   " + total.toLocaleString() + "\n" +
+        "Usable hosts:      " + usable.toLocaleString();
+    }
+    btn.addEventListener("click", calc);
+    calc();
+  }
+
+  // ---------- networking: DNS/TCP/TLS/HTTP request journey ----------
+  var JOURNEY_PHASES = {
+    dns:  { name: "DNS RESOLUTION", color: "#2563eb" },
+    tcp:  { name: "TCP HANDSHAKE",  color: "#7c3aed" },
+    tls:  { name: "TLS HANDSHAKE",  color: "#16a34a" },
+    http: { name: "HTTP EXCHANGE",  color: "#ea580c" }
+  };
+  var JOURNEY_POS = { browser: 0, dns: 129, server: 298 };
+  var JOURNEY_STEPS = [
+    { phase: "dns", target: "dns", label: "Query", caption: "Browser asks its configured DNS resolver: what's the IP for api.example.com?" },
+    { phase: "dns", target: "dns", label: "Root", caption: "Resolver asks a root nameserver, which says: “I don't know that name, but here's who handles .com.”" },
+    { phase: "dns", target: "dns", label: "TLD", caption: "Resolver asks the .com TLD server, which points to example.com's authoritative nameserver." },
+    { phase: "dns", target: "dns", label: "Auth", caption: "Resolver asks the authoritative nameserver directly: the answer is 203.0.113.10." },
+    { phase: "dns", target: "browser", label: "203.0.113.10", caption: "The resolver hands the IP address back to the browser (and caches it for next time)." },
+    { phase: "tcp", target: "server", label: "SYN", caption: "Browser sends a SYN packet to 203.0.113.10:443 — “I'd like to open a connection.”" },
+    { phase: "tcp", target: "browser", label: "SYN-ACK", caption: "Server replies SYN-ACK — “okay, and can you hear me back?”" },
+    { phase: "tcp", target: "server", label: "ACK", caption: "Browser sends ACK. The three-way handshake is complete — a TCP connection is now open." },
+    { phase: "tls", target: "server", label: "ClientHello", caption: "Browser sends a ClientHello: supported TLS versions, cipher suites, and a random number." },
+    { phase: "tls", target: "browser", label: "ServerHello+Cert", caption: "Server replies with its chosen cipher, its TLS certificate, and its own random number." },
+    { phase: "tls", target: "server", label: "Key exchange", caption: "Both sides derive a shared session key from that exchange. From here, everything is encrypted." },
+    { phase: "http", target: "server", label: "GET /", caption: "The browser sends the actual HTTP request, encrypted — and the server sends back the page." }
+  ];
+
+  function initJourney(){
+    var group = $("#journey-packet");
+    if (!group) return;
+    var idx = 0, playing = false;
+    var prevBtn = $("#journey-prev"), nextBtn = $("#journey-next"), playBtn = $("#journey-play");
+    var labelEl = $("#journey-packet-label");
+    var circleEl = group.querySelector("circle");
+    var phaseEl = $("#journey-phase");
+    var countEl = $("#journey-step-count");
+    var captionEl = $("#journey-caption");
+
+    function render(){
+      var step = JOURNEY_STEPS[idx];
+      var phase = JOURNEY_PHASES[step.phase];
+      group.style.transform = "translateX(" + JOURNEY_POS[step.target] + "px)";
+      labelEl.textContent = step.label;
+      circleEl.setAttribute("fill", phase.color);
+      phaseEl.textContent = phase.name;
+      phaseEl.style.background = phase.color;
+      countEl.textContent = "Step " + (idx + 1) + " / " + JOURNEY_STEPS.length;
+      captionEl.textContent = step.caption;
+      prevBtn.disabled = idx === 0;
+      nextBtn.disabled = idx === JOURNEY_STEPS.length - 1;
+    }
+
+    prevBtn.addEventListener("click", function(){ if (idx > 0 && !playing){ idx--; render(); } });
+    nextBtn.addEventListener("click", function(){ if (idx < JOURNEY_STEPS.length - 1 && !playing){ idx++; render(); } });
+    playBtn.addEventListener("click", function(){
+      if (playing) return;
+      if (idx >= JOURNEY_STEPS.length - 1) idx = -1;
+      playing = true;
+      prevBtn.disabled = true; nextBtn.disabled = true; playBtn.disabled = true;
+      function step(){
+        idx++;
+        render();
+        if (idx >= JOURNEY_STEPS.length - 1){
+          playing = false;
+          playBtn.disabled = false;
+          prevBtn.disabled = false;
+          return;
+        }
+        setTimeout(step, 900);
+      }
+      step();
+    });
+
+    render();
+  }
+
+  // ---------- on-call simulator (capstone, all 5 topics) ----------
+  var TOPIC_META = {
+    test:      { label: "TESTING",     color: "var(--test)" },
+    container: { label: "CONTAINERS",  color: "var(--container)" },
+    cicd:      { label: "CI/CD",       color: "var(--cicd)" },
+    monitor:   { label: "MONITORING",  color: "var(--monitor)" },
+    network:   { label: "NETWORKING",  color: "var(--network)" }
+  };
+  var ONCALL_INCIDENTS = [
+    { topic: "test", alert: "A hotfix shipped straight to production with no new tests. It works today — but might silently break other flows.", actions: ["Add regression tests before the next deploy","Ship faster next time and skip tests","Increase server CPU","Restart the database"], correct: 0, explain: "Skipping tests on a hotfix is exactly how regressions sneak back in — add coverage immediately so this bug can't silently return." },
+    { topic: "test", alert: "CI is green, but a customer reports the checkout total is wrong on orders over $1,000 — a range tests never covered.", actions: ["Ignore it, tests pass","Write a new test case covering large-order totals","Roll back the last five deploys","Restart the load balancer"], correct: 1, explain: "Green CI only proves what you tested for. Add a test for the missing case so it's caught automatically next time." },
+    { topic: "container", alert: "kubectl top shows a pod's memory pinned at its limit, and it just restarted for the third time.", actions: ["Delete the pod and hope it doesn't happen again","Disable health checks so it stops restarting","Check usage vs. the limit, then raise the limit or fix the leak","Add more replicas of the same undersized pod"], correct: 2, explain: "Repeated OOMKills mean the limit is too low for real usage (or there's a leak). Disabling health checks would hide the symptom, not fix it." },
+    { topic: "container", alert: "A new image was pushed, but “docker run” fails immediately with “port already allocated.”", actions: ["Give the container root access","Delete the image and rebuild from scratch","Add a volume mount","Check what's already bound to that host port, or map to a different one"], correct: 3, explain: "This is a port-mapping conflict, not an image problem — another process already owns that host port." },
+    { topic: "cicd", alert: "The quality gate is blocking a deploy: the security scan flagged a high-severity vulnerability in a dependency.", actions: ["Manually force-merge past the gate","Disable the security scan stage","Investigate and patch the dependency, then let the pipeline re-run","Roll back to last week's deploy"], correct: 2, explain: "The gate did its job. Bypassing or disabling it defeats the purpose — patch the dependency and let the pipeline re-validate." },
+    { topic: "cicd", alert: "A deploy just shipped a bug to 100% of production traffic in seconds, with no way to catch it early.", actions: ["Add more unit tests only","Deploy less often","Switch to canary or rolling deployments so blast radius is limited","Turn off monitoring alerts"], correct: 2, explain: "This is a deployment-strategy problem, not a testing problem — canary/rolling releases catch bugs before 100% of users are affected." },
+    { topic: "cicd", alert: "A pipeline job has been stuck on “waiting for available runner” for 20 minutes.", actions: ["Check runner capacity/autoscaling and add more runners","Delete the workflow file","Rewrite the Dockerfile","Increase memory limits on the app container"], correct: 0, explain: "This is a CI infrastructure capacity issue — the pipeline has nothing to run on. Scale up runners, don't touch app config." },
+    { topic: "monitor", alert: "Your team just breached the SLO for the month — the error budget is at 0% with two weeks left.", actions: ["Ship the big feature anyway, budgets reset eventually","Raise the SLO target so it's easier to hit","Freeze risky releases and focus on reliability until the budget resets","Turn off the alert so it stops firing"], correct: 2, explain: "An exhausted error budget is a signal to slow down on risk, not to redefine success. Raising the SLO or muting the alert just hides the problem." },
+    { topic: "monitor", alert: "Dashboards show Saturation climbing on the database for the past hour, but no alert has fired.", actions: ["Ignore it, no alert means no problem","Delete the dashboard panel","Check alert thresholds — saturation may need a lower threshold or faster window","Restart the monitoring service"], correct: 2, explain: "A golden signal trending badly with no alert usually means the threshold is misconfigured, not that everything's fine." },
+    { topic: "network", alert: "Users report the site works from the office wifi but times out from everywhere else.", actions: ["Restart the developer's laptop","Check firewall / security-group rules on the public path","Add more RAM to the app server","Rewrite the app in a different language"], correct: 1, explain: "Reachable internally but not externally usually points to a firewall or security-group rule blocking the public path." },
+    { topic: "network", alert: "curl to the API returns “Could not resolve host.”", actions: ["Check DNS records / the resolver","Check container memory limits","Check the CI pipeline logs","Rewrite the SQL query"], correct: 0, explain: "“Could not resolve host” is a DNS resolution failure — the request never even got a destination IP." },
+    { topic: "network", alert: "Latency is fine most of the time but spikes every few minutes, with occasional timeouts.", actions: ["Rewrite the frontend in a different framework","Increase the container's CPU limit","Run traceroute/ping to look for a lossy hop","Add a new unit test"], correct: 2, explain: "Intermittent spikes and timeouts are a classic sign of packet loss on one network hop — traceroute/ping will show where." }
+  ];
+
+  var ONCALL_ROUND_SECONDS = 15;
+  var oncallQueue = [], oncallIdx = 0, oncallScore = 0, oncallTimer = null, oncallTimeLeft = 0, oncallAnswered = false, oncallRecap = [];
+
+  function oncallShuffle(){
+    var idxs = ONCALL_INCIDENTS.map(function(_, i){ return i; });
+    for (var i = idxs.length - 1; i > 0; i--){
+      var j = Math.floor(Math.random() * (i + 1));
+      var t = idxs[i]; idxs[i] = idxs[j]; idxs[j] = t;
+    }
+    return idxs;
+  }
+
+  function oncallStart(){
+    oncallQueue = oncallShuffle();
+    oncallIdx = 0;
+    oncallScore = 0;
+    oncallRecap = [];
+    $("#oncall-idle").style.display = "none";
+    $("#oncall-summary").style.display = "none";
+    $("#oncall-game").style.display = "block";
+    oncallLoadRound();
+  }
+
+  function oncallLoadRound(){
+    oncallAnswered = false;
+    var incident = ONCALL_INCIDENTS[oncallQueue[oncallIdx]];
+    var meta = TOPIC_META[incident.topic];
+    $("#oncall-round-label").textContent = "Round " + (oncallIdx + 1) + " / " + oncallQueue.length;
+    $("#oncall-score-label").textContent = "Score: " + oncallScore;
+    var tag = $("#oncall-topic-tag");
+    tag.textContent = meta.label;
+    tag.style.background = meta.color;
+    $("#oncall-alert-text").textContent = incident.alert;
+    $("#oncall-feedback").textContent = "";
+    $("#oncall-continue").style.display = "none";
+
+    var actionsEl = $("#oncall-actions");
+    actionsEl.innerHTML = "";
+    incident.actions.forEach(function(text, i){
+      var btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "oncall-action-btn";
+      btn.textContent = text;
+      btn.addEventListener("click", function(){ oncallAnswer(i, incident, meta); });
+      actionsEl.appendChild(btn);
+    });
+
+    oncallTimeLeft = ONCALL_ROUND_SECONDS;
+    var fill = $("#oncall-timerfill");
+    fill.style.width = "100%";
+    fill.className = "oncall-timerfill";
+    clearInterval(oncallTimer);
+    oncallTimer = setInterval(function(){
+      oncallTimeLeft -= 0.1;
+      var pct = Math.max(0, (oncallTimeLeft / ONCALL_ROUND_SECONDS) * 100);
+      fill.style.width = pct + "%";
+      fill.className = "oncall-timerfill" + (pct < 30 ? " crit" : pct < 60 ? " warn" : "");
+      if (oncallTimeLeft <= 0){
+        clearInterval(oncallTimer);
+        if (!oncallAnswered) oncallTimeout(incident, meta);
+      }
+    }, 100);
+  }
+
+  function oncallAnswer(choiceIdx, incident, meta){
+    if (oncallAnswered) return;
+    oncallAnswered = true;
+    clearInterval(oncallTimer);
+    var correct = choiceIdx === incident.correct;
+    var fastBonus = oncallTimeLeft > ONCALL_ROUND_SECONDS / 2;
+    var points = correct ? (fastBonus ? 10 : 5) : 0;
+    oncallScore += points;
+    $all(".oncall-action-btn").forEach(function(b, i){
+      b.disabled = true;
+      if (i === incident.correct) b.classList.add("correct");
+      else if (i === choiceIdx) b.classList.add("incorrect");
+    });
+    $("#oncall-feedback").textContent = (correct ? "✅ Correct (+" + points + "). " : "❌ Not the fix. ") + incident.explain;
+    $("#oncall-score-label").textContent = "Score: " + oncallScore;
+    $("#oncall-continue").style.display = "inline-block";
+    oncallRecap.push({ topic: meta.label, ok: correct, points: points });
+  }
+
+  function oncallTimeout(incident, meta){
+    oncallAnswered = true;
+    $all(".oncall-action-btn").forEach(function(b, i){
+      b.disabled = true;
+      if (i === incident.correct) b.classList.add("correct");
+    });
+    $("#oncall-feedback").textContent = "⏰ Time's up — escalated to your manager. " + incident.explain;
+    $("#oncall-continue").style.display = "inline-block";
+    oncallRecap.push({ topic: meta.label, ok: false, points: 0 });
+  }
+
+  function oncallNext(){
+    oncallIdx++;
+    if (oncallIdx >= oncallQueue.length){
+      oncallShowSummary();
+      return;
+    }
+    oncallLoadRound();
+  }
+
+  function oncallShowSummary(){
+    $("#oncall-game").style.display = "none";
+    var max = oncallQueue.length * 10;
+    var grade, gradeColor;
+    if (oncallScore >= max * 0.8){ grade = "🟢 Textbook shift — you're ready for on-call."; gradeColor = "#16a34a"; }
+    else if (oncallScore >= max * 0.5){ grade = "🟡 Solid shift, with a rough patch or two."; gradeColor = "#ca8a04"; }
+    else { grade = "🔴 Rough shift — worth reviewing the sections above."; gradeColor = "#dc2626"; }
+
+    var recapHtml = oncallRecap.map(function(r, i){
+      return '<li><span class="oncall-mark ' + (r.ok ? "ok" : "bad") + '">' + (r.ok ? "✓" : "✗") + "</span> Round " + (i + 1) + " — " + r.topic + " (+" + r.points + ")</li>";
+    }).join("");
+
+    var summary = $("#oncall-summary");
+    summary.innerHTML =
+      '<div class="oncall-summary-grade" style="color:' + gradeColor + ';">' + grade + "</div>" +
+      "<p style=\"font-size:13px; font-weight:700; margin:0 0 10px;\">Final score: " + oncallScore + " / " + max + "</p>" +
+      '<ul class="oncall-recap">' + recapHtml + "</ul>" +
+      '<button type="button" id="oncall-restart" class="runner-btn" style="background:#0f172a; margin-top:12px;">▶ Start New Shift</button>';
+    summary.style.display = "block";
+    $("#oncall-restart").addEventListener("click", oncallStart);
+  }
+
+  function initOncall(){
+    var startBtn = $("#oncall-start");
+    if (!startBtn) return;
+    startBtn.addEventListener("click", oncallStart);
+    $("#oncall-continue").addEventListener("click", oncallNext);
+  }
+
+  document.addEventListener("DOMContentLoaded", function(){
+    initReveal();
+    initPyramid();
+    initQuiz();
+    initContainerPlayer();
+    initMemSim();
+    initPipelineRunner();
+    initErrorBudget();
+    initCidr();
+    initJourney();
+    initOncall();
+  });
+})();
+</script>
+</body>
+</html>
